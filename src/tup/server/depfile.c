@@ -37,7 +37,7 @@
 #include <errno.h>
 #include <signal.h>
 
-#define TUP_TMP ".tup/tmp"
+#define TUP_TMP ".metatup/tmp"
 #define LDPRELOAD_NAME "LD_PRELOAD"
 
 static void sighandler(int sig);
@@ -161,7 +161,7 @@ int server_init(enum server_mode mode)
 		if(f.filename[0] != '.') {
 			if(unlink(f.filename) != 0) {
 				perror(f.filename);
-				fprintf(stderr, "tup error: Unable to clean out a file in .tup/tmp directory. Please try cleaning this directory manually. Note there may be a stuck sub-process that still has the file open (check the Task Manager).\n");
+				fprintf(stderr, "tup error: Unable to clean out a file in .metatup/tmp directory. Please try cleaning this directory manually. Note there may be a stuck sub-process that still has the file open (check the Task Manager).\n");
 				return -1;
 			}
 		}
@@ -288,7 +288,7 @@ int server_exec(struct server *s, int dfd, const char *cmd, struct tup_env *newe
 	int output_fd;
 	if(!s->streaming_mode) {
 		char buf[64];
-		snprintf(buf, sizeof(buf), ".tup/tmp/output-%i", s->id);
+		snprintf(buf, sizeof(buf), ".metatup/tmp/output-%i", s->id);
 		s->output_fd = open(buf, O_CREAT | O_RDWR | O_CLOEXEC | O_TRUNC, 0600);
 		if(s->output_fd < 0) {
 			perror(buf);
@@ -333,7 +333,7 @@ int server_postexec(struct server *s)
 {
 	if(!s->streaming_mode) {
 		char buf[64];
-		snprintf(buf, sizeof(buf), ".tup/tmp/output-%i", s->id);
+		snprintf(buf, sizeof(buf), ".metatup/tmp/output-%i", s->id);
 		buf[sizeof(buf)-1] = 0;
 		if(unlinkat(tup_top_fd(), buf, 0) < 0) {
 			server_lock(s);

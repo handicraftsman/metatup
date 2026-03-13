@@ -26,14 +26,14 @@ check_no_windows symlink
 # Make the symlink first, in a separate directory. That way it will exist
 # and not be marked delete when we create a new Tupfile in the top-level
 mkdir foo
-echo 'var = 3' > foo/x86.tup
+echo 'var = 3' > foo/x86.metatup
 cat > foo/Tupfile << HERE
-: x86.tup |> ln -s %f %o |> arch.tup
+: x86.metatup |> ln -s %f %o |> arch.metatup
 HERE
 update
 
 cat > Tupfile << HERE
-include foo/arch.tup
+include foo/arch.metatup
 HERE
 update_fail_msg "Unable to read from generated file"
 

@@ -25,7 +25,7 @@
 . ./tup.sh
 check_no_windows shell
 
-cat .tup/options << HERE
+cat .metatup/options << HERE
 [display]
 job_numbers = 1
 HERE
@@ -47,10 +47,10 @@ touch build-bar/tup.config
 update
 
 rm -rf build-foo/sub/a
-tup parse > .tup/.tupoutput
+tup parse > .metatup/.tupoutput
 
-if ! grep '5) ' .tup/.tupoutput > /dev/null; then
-	cat .tup/.tupoutput
+if ! grep '5) ' .metatup/.tupoutput > /dev/null; then
+	cat .metatup/.tupoutput
 	echo "Error: Expected 5) in parser output" 1>&2
 	exit 1
 fi

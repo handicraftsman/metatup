@@ -42,10 +42,10 @@ HERE
 touch foo.txt
 update_partial output.txt
 
-update_partial output.txt > .tup/.output.txt
+update_partial output.txt > .metatup/.output.txt
 
-if grep 'sh ok.sh' .tup/.output.txt > /dev/null; then
-	cat .tup/.output.txt
+if grep 'sh ok.sh' .metatup/.output.txt > /dev/null; then
+	cat .metatup/.output.txt
 	echo "Error: should not have run ok.sh in partial update." 1>&2
 	exit 1
 fi

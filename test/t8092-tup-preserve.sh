@@ -43,9 +43,9 @@ cmp file.txt build-2/file.txt
 # Make sure we can re-parse the Tupfile now that we have file.txt in the srcdir
 # and the build dir.
 touch Tupfile
-update > .tup/.tupoutput
-if grep 'preserve file.txt' .tup/.tupoutput > /dev/null; then
-	cat .tup/.tupoutput
+update > .metatup/.tupoutput
+if grep 'preserve file.txt' .metatup/.tupoutput > /dev/null; then
+	cat .metatup/.tupoutput
 	echo "Error: No preserve commands should run when nothing was changed." 1>&2
 	exit 1
 fi

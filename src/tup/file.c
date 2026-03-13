@@ -757,7 +757,7 @@ static int update_write_info(FILE *f, tupid_t cmdid, struct file_info *info,
 		if(!tent) {
 			struct mapping *map;
 
-			fprintf(f, "tup error: File '%s' was written to, but is not in .tup/db. You probably should specify it as an output\n", w->filename);
+			fprintf(f, "tup error: File '%s' was written to, but is not in .metatup/db. You probably should specify it as an output\n", w->filename);
 			write_bork = 1;
 			if(info->do_unlink) {
 				fprintf(f, " -- Delete: %s\n", w->filename);

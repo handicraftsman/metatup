@@ -32,7 +32,7 @@
 /* The virtual directory used to pass @-variable dependencies from a client
  * program to the server.
  */
-#define TUP_VAR_VIRTUAL_DIR "@tup@"
+#define TUP_VAR_VIRTUAL_DIR "@metatup@"
 #define TUP_VAR_VIRTUAL_DIR_LEN (sizeof(TUP_VAR_VIRTUAL_DIR)-1)
 
 enum access_type {

@@ -16,14 +16,14 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# If a sub-process tries to go into the .tup directory, it may hit the fuse
+# If a sub-process tries to go into the .metatup directory, it may hit the fuse
 # mountpoint and hang since we're already in fuse at that point. Subprocesses
-# shouldn't be looking at .tup anyway.
+# shouldn't be looking at .metatup anyway.
 
 . ./tup.sh
 
 cat > Tupfile << HERE
-: |> (ls .tup/mnt 2>/dev/null || true) > %o |> files.txt
+: |> (ls .metatup/mnt 2>/dev/null || true) > %o |> files.txt
 HERE
 update
 

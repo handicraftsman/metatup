@@ -37,10 +37,10 @@ check_exist tmp.txt
 cat > run.sh << HERE
 cp tmp.txt bar.txt
 HERE
-update > .tup/tupoutput
+update > .metatup/tupoutput
 check_not_exist tmp.txt
 
-if grep 'echo foo' .tup/tupoutput; then
+if grep 'echo foo' .metatup/tupoutput; then
 	echo "Error: Should not have re-created foo" 1>&2
 	exit 1
 fi

@@ -45,6 +45,29 @@ static char internal_path_sep = '\\';
 static char internal_path_sep = '/';
 #endif
 
+int migrate_legacy_tup_dir(void)
+{
+	struct stat st;
+
+	if(stat(TUP_DIR, &st) == 0)
+		return 0;
+	if(errno != ENOENT)
+		return -1;
+
+	if(stat(TUP_DIR_LEGACY, &st) < 0) {
+		if(errno == ENOENT)
+			return 1;
+		return -1;
+	}
+	if(rename(TUP_DIR_LEGACY, TUP_DIR) < 0) {
+		perror("rename");
+		fprintf(stderr, "tup error: Unable to migrate legacy project directory '%s' to '%s'.\n", TUP_DIR_LEGACY, TUP_DIR);
+		return -1;
+	}
+	printf("Migrated legacy project directory %s -> %s\n", TUP_DIR_LEGACY, TUP_DIR);
+	return 0;
+}
+
 int find_tup_dir(void)
 {
 	struct stat st;
@@ -58,7 +81,12 @@ int find_tup_dir(void)
 	tup_top_len = strlen(tup_wd);
 	tup_sub_len = 0;
 	while(1) {
-		if(stat(".tup", &st) == 0 && S_ISDIR(st.st_mode)) {
+		int rc = migrate_legacy_tup_dir();
+		if(rc < 0) {
+			fprintf(stderr, "tup error: Unable to check project metadata directory during initialization.\n");
+			exit(1);
+		}
+		if(stat(TUP_DIR, &st) == 0 && S_ISDIR(st.st_mode)) {
 			tup_wd_offset = tup_top_len;
 			while(is_path_sep(&tup_wd[tup_wd_offset])) {
 				tup_wd_offset++;
@@ -95,7 +123,7 @@ int open_tup_top(void)
 	}
 	if(tup_wd[0] == 0) {
 		/* This is used for 'tup generate' on Windows to set the root
-		 * directory, since we don't have a .tup hierarchy when
+		 * directory, since we don't have a .metatup hierarchy when
 		 * generating scripts, but still need a tup_wd for fchdir() to
 		 * work.
 		 */

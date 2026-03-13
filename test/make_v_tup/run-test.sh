@@ -1,6 +1,6 @@
 #! /bin/bash
 
-TUP=$(pwd)/../../tup
+TUP=$(pwd)/../../metatup
 
 rm -rf run_test_tmp
 mkdir run_test_tmp
@@ -52,4 +52,4 @@ benchmark ()
 benchmark "make" ":" ":" "make -rR > /dev/null" ":"
 benchmark "tup" "$TUP init --force > /dev/null" "$TUP monitor" "$TUP upd > /dev/null" "$TUP stop"
 
-#diff -r tmake ttup | grep -v Makefile | grep -v build | grep -v '\.d$' | grep -v '\.tup'
+#diff -r tmake ttup | grep -v Makefile | grep -v build | grep -v '\.d$' | grep -v '\.metatup'

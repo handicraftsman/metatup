@@ -600,7 +600,7 @@ static int monitor_loop(void)
 				 * monitor.
 				 */
 				if(e->len && strcmp(e->name, "db") == 0) {
-					printf("tup monitor: .tup file '%s' deleted - shutting down.\n", e->len ? e->name : "");
+					printf("tup monitor: .metatup file '%s' deleted - shutting down.\n", e->len ? e->name : "");
 					return 0;
 				}
 			} else if(e->wd == obj_wd) {

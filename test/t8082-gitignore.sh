@@ -36,7 +36,7 @@ update
 
 gitignore_good bar.txt build/bar/.gitignore
 gitignore_good foo.txt build/.gitignore
-gitignore_good .tup .gitignore
+gitignore_good .metatup .gitignore
 gitignore_bad foo.txt .gitignore
 
 eotup

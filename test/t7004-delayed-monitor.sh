@@ -21,7 +21,7 @@ check_monitor_supported
 
 # First create a foo.c program, then stop the monitor
 monitor
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 echo "int main(void) {return 0;}" > foo.c
 update
 stop_monitor

@@ -24,9 +24,9 @@
 #include "tup_lock_t.h"
 
 /** Tri-lock */
-#define TUP_SHARED_LOCK ".tup/shared"
-#define TUP_OBJECT_LOCK ".tup/object"
-#define TUP_TRI_LOCK ".tup/tri"
+#define TUP_SHARED_LOCK ".metatup/shared"
+#define TUP_OBJECT_LOCK ".metatup/object"
+#define TUP_TRI_LOCK ".metatup/tri"
 
 /** Initializes the shared tup object lock. This allows multiple readers to
  * access tup. If you want exclusive access, you'll need to up the lock

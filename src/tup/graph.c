@@ -270,9 +270,9 @@ int destroy_graph(struct graph *g)
 
 void save_graphs(struct graph *g)
 {
-	save_graph(stderr, g, ".tup/tmp/graph-full-%i.dot");
+	save_graph(stderr, g, ".metatup/tmp/graph-full-%i.dot");
 	trim_graph(g);
-	save_graph(stderr, g, ".tup/tmp/graph-trimmed-%i.dot");
+	save_graph(stderr, g, ".metatup/tmp/graph-trimmed-%i.dot");
 }
 
 static int expand_node(struct graph *g, struct node *n)
@@ -1437,7 +1437,7 @@ int group_circ_check(void)
 			}
 		}
 		fprintf(stderr, "See the saved graph for the commands involved.\n");
-		save_graph(stderr, &group_graph, ".tup/tmp/graph-group-circular-%i.dot");
+		save_graph(stderr, &group_graph, ".metatup/tmp/graph-group-circular-%i.dot");
 		return -1;
 	}
 	return 0;

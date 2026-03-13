@@ -27,9 +27,9 @@ HERE
 touch foo.c bar.c
 tup parse
 
-tup commandline foo.c > .tup/output.txt
+tup commandline foo.c > .metatup/output.txt
 
-if ! grep '"command": "gcc -c foo.c -o foo.o",' .tup/output.txt > /dev/null; then
+if ! grep '"command": "gcc -c foo.c -o foo.o",' .metatup/output.txt > /dev/null; then
 	echo "Error: Expected gcc command in output." 1>&2
 	exit 1
 fi

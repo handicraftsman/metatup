@@ -25,11 +25,11 @@
 
 . ./tup.sh
 check_monitor_supported
-monitor --autoupdate > .tup/.monitor.output 2>&1
+monitor --autoupdate > .metatup/.monitor.output 2>&1
 
 cat > ok.sh << HERE
 #! /bin/sh
-echo 'executed' >> .tup/.run.txt
+echo 'executed' >> .metatup/.run.txt
 touch foo
 HERE
 
@@ -39,7 +39,7 @@ HERE
 tup flush
 check_exist foo
 
-if [ "$(grep -c executed .tup/.run.txt)" != 1 ]; then
+if [ "$(grep -c executed .metatup/.run.txt)" != 1 ]; then
 	echo "Error: ok.sh should have run once" 1>&2
 	exit 1
 fi
@@ -49,7 +49,7 @@ cat > Tupfile << HERE
 HERE
 tup flush
 
-if [ "$(grep -c executed .tup/.run.txt)" != 2 ]; then
+if [ "$(grep -c executed .metatup/.run.txt)" != 2 ]; then
 	echo "Error: ok.sh should have run twice altogether" 1>&2
 	exit 1
 fi

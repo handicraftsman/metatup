@@ -20,20 +20,20 @@
 . ./tup.sh
 
 for i in `seq 0 19`; do
-	check_not_exist .tup/log/debug.log.$i
+	check_not_exist .metatup/log/debug.log.$i
 done
 for i in `seq 0 19`; do
 	update --debug-logging > /dev/null
-	check_exist .tup/log/debug.log.$i
+	check_exist .metatup/log/debug.log.$i
 done
 update --debug-logging > /dev/null
-check_not_exist .tup/log/debug.log.20
+check_not_exist .metatup/log/debug.log.20
 
 log_good "Tup update at"
 touch foo.txt
 update --debug-logging
-check_exist .tup/log/debug.log.0
-check_exist .tup/log/debug.log.1
+check_exist .metatup/log/debug.log.0
+check_exist .metatup/log/debug.log.1
 log_good "Create.*foo.txt"
 
 touch foo.txt

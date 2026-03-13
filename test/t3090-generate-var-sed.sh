@@ -27,7 +27,7 @@ echo "hey @FOO@ yo" > foo.txt
 echo "This is an email@address.com" >> foo.txt
 varsetall FOO=sup
 
-rm -rf .tup
+rm -rf .metatup
 generate $generate_script_name
 ./$generate_script_name
 

@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 . ./tup.sh
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 
 # Verify all files are compiled
 echo "int main(void) {return 0;}" > foo.c
@@ -30,7 +30,7 @@ sym_check baz.o baz1
 sym_check prog.exe main bar1 baz1
 
 # When baz.c is deleted, baz.o should be deleted as well, and prog.exe should be
-# re-linked. The baz.[co] objects should be removed from .tup
+# re-linked. The baz.[co] objects should be removed from .metatup
 rm baz.c
 update
 check_not_exist baz.o

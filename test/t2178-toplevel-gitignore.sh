@@ -16,7 +16,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# Since the top-level .gitignore file ignores the '.tup' directory, we should
+# Since the top-level .gitignore file ignores the '.metatup' directory, we should
 # make sure one exists if there is a top-level Tuprules.tup that has
 # '.gitignore' even if there is no top-level Tupfile. Note that we should only
 # pick up the .gitignore directive, not any rules.
@@ -39,6 +39,7 @@ HERE
 update
 
 gitignore_good .tup .gitignore
+gitignore_good .metatup .gitignore
 gitignore_good foo sub/.gitignore
 check_not_exist bar/.gitignore
 tup_object_no_exist . 'echo hey'

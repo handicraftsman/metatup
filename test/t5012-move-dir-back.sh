@@ -21,7 +21,7 @@
 . ./tup.sh
 mkdir a
 mkdir a/a2
-cp ../testTupfile.tup a/a2/Tupfile
+cp ../testTupfile.metatup a/a2/Tupfile
 
 echo "int main(void) {return 0;}" > a/a2/foo.c
 update

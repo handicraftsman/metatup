@@ -16,7 +16,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# Make sure 'tup' works without a .tup directory or Tupfile.ini present.
+# Make sure 'tup' works without a .metatup directory or Tupfile.ini present.
 
 . ./tup.sh
 
@@ -34,7 +34,7 @@ cd $tmpdir
 output="$tupcurdir/$tuptestdir/output.txt"
 tup 2> $output || true
 
-if ! grep 'No .tup directory found' $output > /dev/null; then
+if ! grep 'No .metatup directory found' $output > /dev/null; then
 	echo "Error: Expected tup to print an error message." 1>&2
 	exit 1
 fi

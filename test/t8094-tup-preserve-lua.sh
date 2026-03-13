@@ -55,9 +55,9 @@ echo 'generated subdir content' | diff - build/sub/bar/out.txt
 # Make sure we can re-parse the Tupfile now that we have file.txt in the srcdir
 # and the build dir.
 touch Tupfile.lua sub/bar/Tupfile.lua
-update > .tup/.tupoutput
-if grep 'preserve file.txt' .tup/.tupoutput > /dev/null; then
-	cat .tup/.tupoutput
+update > .metatup/.tupoutput
+if grep 'preserve file.txt' .metatup/.tupoutput > /dev/null; then
+	cat .metatup/.tupoutput
 	echo "Error: No preserve commands should run when nothing was changed." 1>&2
 	exit 1
 fi

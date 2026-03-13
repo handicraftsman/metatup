@@ -17,10 +17,17 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 tupcurdir=$PWD
+tupcmd=metatup
+tupdir=.metatup
 
-# Prefix PATH so the test cases run the local tup
-PATH=$PWD/..:$PATH
+# Prefix PATH so the test cases run the local metatup binary.
+PATH=$PWD/../build:$PWD/..:$PATH
 export PATH
+
+tup()
+{
+	"$tupcmd" "$@"
+}
 
 testname=`echo $0 | sed 's/.*\///; s/\.sh//'`
 tuptestdir="tuptesttmp-$testname"
@@ -32,7 +39,7 @@ tuptestdir="tuptesttmp-$testname"
 rm -rf $tuptestdir
 mkdir $tuptestdir
 cd $tuptestdir
-tup init --no-sync --force
+metatup init --no-sync --force
 
 generate_script_name="build.sh"
 case $tupos in
@@ -145,7 +152,7 @@ tup_object_exist()
 		if tup node_exists $dir "$1"; then
 			:
 		else
-			echo "*** Missing node \"$1\" from .tup/db" 1>&2
+			echo "*** Missing node \"$1\" from .metatup/db" 1>&2
 			exit 1
 		fi
 		shift
@@ -164,7 +171,7 @@ tup_object_no_exist()
 		# stderr redirection is to ignore warnings about non-existant
 		# directories when checking for ghost files
 		if tup node_exists $dir "$1" 2>/dev/null; then
-			echo "*** Node \"$1\" exists in .tup/db when it shouldn't" 1>&2
+			echo "*** Node \"$1\" exists in .metatup/db when it shouldn't" 1>&2
 			exit 1
 		fi
 		shift
@@ -310,17 +317,17 @@ update_fail()
 update_fail_msg()
 {
 	set_leak_check no
-	if __update 2>.tup/.tupoutput; then
+	if __update 2>.metatup/.metatupoutput; then
 		echo "*** Expected update to fail, but didn't" 1>&2
 		exit 1
 	else
 		while [ $# -gt 0 ]; do
-			if grep "$1" .tup/.tupoutput > /dev/null; then
+			if grep "$1" .metatup/.metatupoutput > /dev/null; then
 				echo "Update expected to fail, and failed for the right reason."
 			else
 				echo "*** Update expected to fail because of: $1" 1>&2
 				echo "*** But failed because of:" 1>&2
-				cat .tup/.tupoutput 1>&2
+				cat .metatup/.metatupoutput 1>&2
 				exit 1
 			fi
 			shift
@@ -331,14 +338,14 @@ update_fail_msg()
 
 update_null()
 {
-	if ! __update > .tup/.tupoutput 2>&1; then
-		cat .tup/.tupoutput
+	if ! __update > .metatup/.metatupoutput 2>&1; then
+		cat .metatup/.metatupoutput
 		echo "Error: Expected update_null() to exit successfully." 1>&1
 		exit 1
 	fi
 	for i in "Tupfiles" "files" "commands"; do
-		if ! grep "No $i" .tup/.tupoutput > /dev/null; then
-			cat .tup/.tupoutput
+		if ! grep "No $i" .metatup/.metatupoutput > /dev/null; then
+			cat .metatup/.metatupoutput
 			echo "Error: $1 (Expected \"No $i\" in tup output)" 1>&2
 			exit 1
 		fi
@@ -354,16 +361,16 @@ parse()
 
 parse_fail_msg()
 {
-	if tup parse 2>.tup/.tupoutput; then
+	if tup parse 2>.metatup/.metatupoutput; then
 		echo "*** Expected parsing to fail, but didn't" 1>&2
 		exit 1
 	else
-		if grep "$1" .tup/.tupoutput > /dev/null; then
+		if grep "$1" .metatup/.metatupoutput > /dev/null; then
 			echo "Parsing expected to fail, and failed for the right reason."
 		else
 			echo "*** Parsing expected to fail because of: $1" 1>&2
 			echo "*** But failed because of:" 1>&2
-			cat .tup/.tupoutput 1>&2
+			cat .metatup/.metatupoutput 1>&2
 			exit 1
 		fi
 	fi
@@ -378,16 +385,16 @@ refactor()
 
 refactor_fail_msg()
 {
-	if tup refactor 2>.tup/.tupoutput; then
+	if tup refactor 2>.metatup/.metatupoutput; then
 		echo "*** Expected refactoring to fail, but didn't" 1>&2
 		exit 1
 	else
-		if grep "$1" .tup/.tupoutput > /dev/null; then
+		if grep "$1" .metatup/.metatupoutput > /dev/null; then
 			echo "Refactoring expected to fail, and failed for the right reason."
 		else
 			echo "*** Refactoring expected to fail because of: $1" 1>&2
 			echo "*** But failed because of:" 1>&2
-			cat .tup/.tupoutput 1>&2
+			cat .metatup/.metatupoutput 1>&2
 			exit 1
 		fi
 	fi
@@ -454,22 +461,22 @@ gitignore_good()
 
 log_good()
 {
-	gitignore_good "$1" .tup/log/debug.log.0
+	gitignore_good "$1" .metatup/log/debug.log.0
 }
 
 log_graph_good()
 {
-	gitignore_good "$2" .tup/log/$1.dot.0
+	gitignore_good "$2" .metatup/log/$1.dot.0
 }
 
 log_graph_bad()
 {
-	gitignore_bad "$2" .tup/log/$1.dot.0
+	gitignore_bad "$2" .metatup/log/$1.dot.0
 }
 
 vardict_exist()
 {
-	if grep "\<$1\>" .tup/vardict > /dev/null; then
+	if grep "\<$1\>" .metatup/vardict > /dev/null; then
 		:
 	else
 		echo "Error: $1 not found in vardict file" 1>&2
@@ -479,7 +486,7 @@ vardict_exist()
 
 vardict_no_exist()
 {
-	if grep "\<$1\>" .tup/vardict > /dev/null 2>/dev/null; then
+	if grep "\<$1\>" .metatup/vardict > /dev/null 2>/dev/null; then
 		echo "Error: $1 found in vardict file when it shouldn't" 1>&2
 		exit 1
 	fi
@@ -547,10 +554,10 @@ stop_monitor()
 
 signal_monitor()
 {
-	if [ -f .tup/monitor.pid ]; then
+	if [ -f .metatup/monitor.pid ]; then
 		# It's really confusing if you happen to 'kill -USR1 -1', cuz
 		# everything disappears.
-		text=`cat .tup/monitor.pid`
+		text=`cat .metatup/monitor.pid`
 		if echo "$text" | grep '\-1' > /dev/null; then
 			echo "Error: Monitor is not running - unable to signal" 1>&2
 			exit 1
@@ -579,20 +586,20 @@ generate_fail_msg()
 {
 	msg=$1
 	shift
-	if tup generate "$@" 2>.tupoutput; then
+	if tup generate "$@" 2>.metatupoutput; then
 		echo "*** Expected generate to fail, but didn't" 1>&2
 		exit 1
 	else
-		if grep "$msg" .tupoutput > /dev/null; then
+		if grep "$msg" .metatupoutput > /dev/null; then
 			echo "Generate expected to fail, and failed for the right reason."
 		else
 			echo "*** Generate expected to fail because of: $msg" 1>&2
 			echo "*** But failed because of:" 1>&2
-			cat .tupoutput 1>&2
+			cat .metatupoutput 1>&2
 			exit 1
 		fi
 	fi
-	rm .tupoutput
+	rm .metatupoutput
 }
 
 compiledb()
@@ -609,7 +616,7 @@ compiledb()
 
 re_init()
 {
-	rm -rf .tup
+	rm -rf .metatup
 	tup init --no-sync --force
 }
 
@@ -639,7 +646,7 @@ HERE
 	if [ "$tupos" = "SunOS" ]; then
 		plat_ldflags="$plat_ldflags -lsocket"
 	fi
-	if ldd ../../tup | grep 'libasan' > /dev/null; then
+	if ldd ../../metatup | grep 'libasan' > /dev/null; then
 		plat_ldflags="$plat_ldflags -lasan -lubsan"
 	fi
 	gcc client.c ../../libtup_client.a -o client $plat_ldflags -ldl
@@ -773,27 +780,27 @@ check_ccache_version()
 
 single_threaded()
 {
-	(echo "[updater]"; echo "num_jobs=1") >> .tup/options
+	(echo "[updater]"; echo "num_jobs=1") >> .metatup/options
 }
 
 set_autoupdate()
 {
-	(echo "[monitor]"; echo "autoupdate=1") >> .tup/options
+	(echo "[monitor]"; echo "autoupdate=1") >> .metatup/options
 }
 
 set_full_deps()
 {
-	(echo "[updater]"; echo "full_deps=1") >> .tup/options
+	(echo "[updater]"; echo "full_deps=1") >> .metatup/options
 }
 
 set_quiet()
 {
-	(echo "[display]"; echo "quiet=1") >> .tup/options
+	(echo "[display]"; echo "quiet=1") >> .metatup/options
 }
 
 clear_full_deps()
 {
-	(echo "[updater]"; echo "full_deps=0") >> .tup/options
+	(echo "[updater]"; echo "full_deps=0") >> .metatup/options
 }
 
 tup_ln_cmd() {
@@ -806,11 +813,11 @@ eotup()
 		stop_monitor
 	fi
 	cd $tupcurdir
-	if [ -f "$tuptestdir/.tup/mnt/.metadata_never_index" ]; then
-		rm "$tuptestdir/.tup/mnt/.metadata_never_index"
+	if [ -f "$tuptestdir/.metatup/mnt/.metadata_never_index" ]; then
+		rm "$tuptestdir/.metatup/mnt/.metadata_never_index"
 	fi
-	if [ -d "$tuptestdir/.tup/mnt" ]; then
-		mntdir=`find $tuptestdir/.tup/mnt -maxdepth 0 -not -empty`
+	if [ -d "$tuptestdir/.metatup/mnt" ]; then
+		mntdir=`find $tuptestdir/.metatup/mnt -maxdepth 0 -not -empty`
 		if [ "$mntdir" != "" ]; then
 			echo "Error: $mntdir is not empty yet. Is fuse still mounted?" 1>&2
 			exit 1

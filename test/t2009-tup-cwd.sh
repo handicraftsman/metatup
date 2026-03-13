@@ -21,17 +21,17 @@
 . ./tup.sh
 mkdir fs
 cat > fs/Tupfile << HERE
-include ../bar/Install.tup
-include ../tab/Install.tup
+include ../bar/Install.metatup
+include ../tab/Install.metatup
 : foreach \$(lib) |> cp %f %o |> %b
 HERE
 mkdir bar
-cat > bar/Install.tup << HERE
+cat > bar/Install.metatup << HERE
 lib += \$(TUP_CWD)/foo.so
 HERE
 
 mkdir tab
-cat > tab/Install.tup << HERE
+cat > tab/Install.metatup << HERE
 lib += \$(TUP_CWD)/blah.so
 HERE
 

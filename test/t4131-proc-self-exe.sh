@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # When doing a readlink() on /proc/self/exe in a chroot, we need to make sure
-# our .tup/mnt path is not present.
+# our .metatup/mnt path is not present.
 
 . ./tup.sh
 if [ ! "$tupos" = "Linux" ]; then

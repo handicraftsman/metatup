@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 . ./tup.sh
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 
 (echo "#include \"foo.h\""; echo "int main(void) {return 0;}") > foo.c
 (echo "#include \"foo.h\""; echo "void bar1(void) {}") > bar.c

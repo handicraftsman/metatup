@@ -28,12 +28,12 @@ cat > lib/Tupfile << HERE
 : |> touch %o |> lib.a
 HERE
 
-cat > lib/lib.tup << HERE
+cat > lib/lib.metatup << HERE
 static_libs += \$(TUP_CWD)/lib.a
 HERE
 
 cat > Tupfile << HERE
-&lib = lib/lib.tup
+&lib = lib/lib.metatup
 include &(lib)
 : foreach \$(static_libs) |> cp %f %o |> %b.copy
 HERE

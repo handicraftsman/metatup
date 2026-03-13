@@ -21,29 +21,29 @@
 . ./tup.sh
 cat > Tupfile << HERE
 var = foo
-include \$(var).tup
+include \$(var).metatup
 HERE
 
 cat > foo.tup << HERE
 : |> echo foo > %o |> file
 HERE
-cat > bar.tup << HERE
+cat > bar.metatup << HERE
 : |> echo bar > %o |> file
 HERE
 
 parse
 tup_object_exist . 'echo foo > file'
 tup_dep_exist . foo.tup 0 .
-tup_dep_no_exist . bar.tup 0 .
+tup_dep_no_exist . bar.metatup 0 .
 
 cat > Tupfile << HERE
 var = bar
-include \$(var).tup
+include \$(var).metatup
 HERE
 
 parse
 tup_object_exist . 'echo bar > file'
 tup_dep_no_exist . foo.tup 0 .
-tup_dep_exist . bar.tup 0 .
+tup_dep_exist . bar.metatup 0 .
 
 eotup

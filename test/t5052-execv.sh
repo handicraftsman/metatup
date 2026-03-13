@@ -22,7 +22,7 @@
 
 # After updating cygwin, apparently the execl causes the WaitForSingleObject()
 # call to return immediately, even though prog.exe is still running and
-# has the .tup/tmp/output-%i file open.
+# has the .metatup/tmp/output-%i file open.
 check_no_windows execl
 
 cat > Tupfile << HERE

@@ -21,7 +21,7 @@
 
 . ./tup.sh
 check_monitor_supported
-monitor --autoupdate > .tup/.monitor.output 2>&1
+monitor --autoupdate > .metatup/.monitor.output 2>&1
 tup flush
 
 cat > main.c << HERE
@@ -38,11 +38,11 @@ HERE
 tup flush
 check_exist prog
 
-if [ "$(grep -c Updated .tup/.monitor.output)" != 1 ]; then
+if [ "$(grep -c Updated .metatup/.monitor.output)" != 1 ]; then
 	sleep 0.5
-	if [ "$(grep -c Updated .tup/.monitor.output)" != 1 ]; then
+	if [ "$(grep -c Updated .metatup/.monitor.output)" != 1 ]; then
 		echo "Monitor output:" 1>&2
-		cat .tup/.monitor.output 1>&2
+		cat .metatup/.monitor.output 1>&2
 		echo "Error: tup should only update once" 1>&2
 		exit 1
 	fi

@@ -23,10 +23,10 @@ mkdir sub1
 mkdir sub1/sub2
 mkdir sub1/sub2/sub3
 
-echo 'include sub1/1.tup' > Tupfile
-echo 'include sub2/2.tup' > sub1/1.tup
-echo 'include sub3/3.tup' > sub1/sub2/2.tup
-echo 'cflags += -DFOO' > sub1/sub2/sub3/3.tup
+echo 'include sub1/1.metatup' > Tupfile
+echo 'include sub2/2.metatup' > sub1/1.metatup
+echo 'include sub3/3.metatup' > sub1/sub2/2.metatup
+echo 'cflags += -DFOO' > sub1/sub2/sub3/3.metatup
 update
 
 eotup

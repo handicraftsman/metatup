@@ -33,8 +33,8 @@ cleanup
 mkdir $tmpdir
 cd $tmpdir
 tup init
-if [ ! -f ".tup/db" ]; then
-	echo ".tup/db not created!" 1>&2
+if [ ! -f ".metatup/db" ]; then
+	echo ".metatup/db not created!" 1>&2
 	exit 1
 fi
 

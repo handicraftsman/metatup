@@ -20,12 +20,12 @@
 check_no_windows sqlite3 executable
 
 # Re-create the tup database from DB_VERSION 1
-rm -rf .tup
-mkdir .tup
-touch .tup/monitor
-touch .tup/object
-touch .tup/updater
-sqlite3 .tup/db << HERE
+rm -rf .metatup
+mkdir .metatup
+touch .metatup/monitor
+touch .metatup/object
+touch .metatup/updater
+sqlite3 .metatup/db << HERE
 create table node (id integer primary key not null, dir integer not null, type integer not null, flags integer not null, name varchar(4096));
 create table link (from_id integer, to_id integer);
 create table var (id integer primary key not null, value varchar(4096));
@@ -43,12 +43,12 @@ insert into node values(2, 1, 2, 2, '@');
 update config set rval=0 where lval='db_sync';
 update config set rval=1 where lval='db_version';
 HERE
-cat > .tup/options << HERE
+cat > .metatup/options << HERE
 [db]
 sync=0
 HERE
 
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 echo "int main(void) {}" > foo.c
 update
 sym_check foo.o main

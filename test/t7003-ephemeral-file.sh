@@ -19,7 +19,7 @@
 . ./tup.sh
 check_monitor_supported
 monitor
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 
 echo "int main(void) {return 0;}" > foo.c
 update

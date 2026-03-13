@@ -31,7 +31,7 @@ if [ ! -f .gitignore ]; then
 	exit 1
 fi
 
-gitignore_good .tup .gitignore
+gitignore_good .metatup .gitignore
 
 mkdir .git
 update

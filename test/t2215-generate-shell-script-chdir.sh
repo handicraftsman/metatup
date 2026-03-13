@@ -22,7 +22,7 @@
 check_no_windows shell
 
 # 'tup generate' runs without a tup directory
-rm -rf .tup
+rm -rf .metatup
 
 mkdir sub1
 echo 'a' > sub1/dat.txt

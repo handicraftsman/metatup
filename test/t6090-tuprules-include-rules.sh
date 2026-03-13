@@ -32,9 +32,9 @@ HERE
 update_fail_msg "Unable to call include_rules from within a Tuprules.tup context"
 
 cat > Tuprules.tup << HERE
-include extra.tup
+include extra.metatup
 HERE
-cat > extra.tup << HERE
+cat > extra.metatup << HERE
 include_rules
 HERE
 update_fail_msg "Unable to call include_rules from within a Tuprules.tup context"

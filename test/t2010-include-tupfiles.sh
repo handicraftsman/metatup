@@ -20,18 +20,18 @@
 
 . ./tup.sh
 cat > Tupfile << HERE
-include foo/Install.tup
-include bar/Install.tup
+include foo/Install.metatup
+include bar/Install.metatup
 : foreach \$(input) |> cp %f %o |> %B.o
 HERE
 
 mkdir foo
-cat > foo/Install.tup << HERE
+cat > foo/Install.metatup << HERE
 input += foo/sball
 HERE
 
 mkdir bar
-cat > bar/Install.tup << HERE
+cat > bar/Install.metatup << HERE
 input += bar/tab
 HERE
 

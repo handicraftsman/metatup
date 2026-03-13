@@ -1,0 +1,23 @@
+include_rules
+
+yaml_srcs += libyaml/src/api.c
+yaml_srcs += libyaml/src/reader.c
+yaml_srcs += libyaml/src/scanner.c
+yaml_srcs += libyaml/src/parser.c
+yaml_srcs += libyaml/src/loader.c
+yaml_srcs += libyaml/src/writer.c
+yaml_srcs += libyaml/src/emitter.c
+yaml_srcs += libyaml/src/dumper.c
+
+YAML_CFLAGS = $(CFLAGS)
+YAML_CFLAGS += -I$(TUP_CWD)/third-party/libyaml/include
+YAML_CFLAGS += -DYAML_VERSION_MAJOR=0
+YAML_CFLAGS += -DYAML_VERSION_MINOR=2
+YAML_CFLAGS += -DYAML_VERSION_PATCH=5
+YAML_CFLAGS += -DYAML_VERSION_STRING=\"0.2.5\"
+
+!cc_yaml = |> ^ CC %f^ $(CC) -c %f -o %o $(YAML_CFLAGS) $(CFLAGS_%f) |> libyaml-%B.o
+
+: foreach $(yaml_srcs) | libyaml/include/yaml.h libyaml/src/yaml_private.h |> !cc_yaml |> {yaml_objs}
+
+: {yaml_objs} |> !ar |> libyaml.a

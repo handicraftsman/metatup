@@ -21,8 +21,9 @@
 #ifndef tup_db_types_h
 #define tup_db_types_h
 
-#define TUP_DIR ".tup"
-#define TUP_DB_FILE ".tup/db"
+#define TUP_DIR ".metatup"
+#define TUP_DIR_LEGACY ".tup"
+#define TUP_DB_FILE ".metatup/db"
 #define DOT_DT 1
 
 enum TUP_NODE_TYPE {

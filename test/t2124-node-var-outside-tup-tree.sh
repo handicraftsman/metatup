@@ -16,7 +16,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# Test that a node-variable cannot refer to a file beyond the .tup root
+# Test that a node-variable cannot refer to a file beyond the .metatup root
 
 . ./tup.sh
 

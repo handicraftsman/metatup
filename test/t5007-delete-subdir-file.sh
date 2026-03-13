@@ -18,7 +18,7 @@
 
 . ./tup.sh
 mkdir blah
-cp ../testTupfile.tup blah/Tupfile
+cp ../testTupfile.metatup blah/Tupfile
 
 # Verify all files are compiled
 echo "int main(void) {return 0;}" > blah/foo.c
@@ -31,7 +31,7 @@ sym_check blah/baz.o baz1
 sym_check blah/prog.exe main bar1 baz1
 
 # When baz.c is deleted, baz.o should be deleted as well, and prog.exe should be
-# re-linked. The baz.[co] objects should be removed from .tup
+# re-linked. The baz.[co] objects should be removed from .metatup
 rm blah/baz.c
 update
 check_not_exist blah/baz.o

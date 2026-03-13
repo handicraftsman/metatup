@@ -20,7 +20,7 @@
 . ./tup.sh
 check_no_windows run-script
 
-cat > .tup/options << HERE
+cat > .metatup/options << HERE
 [display]
 job_numbers = 1
 HERE

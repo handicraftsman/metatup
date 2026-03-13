@@ -24,7 +24,7 @@ check_monitor_supported
 monitor
 
 echo "int main(void) {return 0;}" > foo.c
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 stop_monitor
 monitor
 update

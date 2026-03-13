@@ -25,12 +25,12 @@ check_no_windows shell
 cat > Tupfile << HERE
 : |> false && touch foo.o |> foo.o
 HERE
-if __update 2> .tup/.tupoutput; then
+if __update 2> .metatup/.tupoutput; then
 	echo "*** Expected update to fail, but didn't" 1>&2
 	exit 1
 fi
 
-if grep 'failed to process input dependencies' .tup/.tupoutput > /dev/null; then
+if grep 'failed to process input dependencies' .metatup/.tupoutput > /dev/null; then
 	echo "Error: The error message shouldn't mention input dependencies" 1>&2
 	exit 1
 fi

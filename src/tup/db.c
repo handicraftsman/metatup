@@ -50,7 +50,7 @@
 #include "sqlite3/sqlite3.h"
 
 #define DB_VERSION 19
-#define PARSER_VERSION 16
+#define PARSER_VERSION 17
 
 enum {
 	DB_BEGIN,
@@ -248,14 +248,36 @@ static int msqlite3_reset(sqlite3_stmt *stmt)
 	return sqlite3_reset(stmt);
 }
 
+static const char *get_db_path(char *buf, size_t bufsize)
+{
+	const char *tup_top;
+	int tup_top_len;
+
+	tup_top = get_tup_top();
+	tup_top_len = get_tup_top_len();
+	if(tup_top_len <= 0 || tup_top[0] == 0)
+		return TUP_DB_FILE;
+
+	if(snprintf(buf, bufsize, "%s/%s", tup_top, TUP_DB_FILE) >= (signed)bufsize) {
+		fprintf(stderr, "tup internal error: Database path buffer is sized incorrectly.\n");
+		return NULL;
+	}
+	return buf;
+}
+
 static int db_open(void)
 {
 	int x;
 	int db_sync;
+	char db_path[PATH_MAX];
+	const char *dbname;
 
 	if(tup_db)
 		return 0;
-	if(sqlite3_open_v2(TUP_DB_FILE, &tup_db, SQLITE_OPEN_READWRITE, NULL) != 0) {
+	dbname = get_db_path(db_path, sizeof(db_path));
+	if(!dbname)
+		return -1;
+	if(sqlite3_open_v2(dbname, &tup_db, SQLITE_OPEN_READWRITE, NULL) != 0) {
 		fprintf(stderr, "Unable to open database: %s\n",
 			sqlite3_errmsg(tup_db));
 		return -1;
@@ -309,6 +331,7 @@ int tup_db_create(int db_sync, int memory_db)
 	int rc;
 	int x;
 	const char *dbname;
+	char db_path[PATH_MAX];
 	const char *sql[] = {
 		"create table node (id integer primary key not null, dir integer not null, type integer not null, mtime integer not null, mtime_ns integer not null, srcid integer not null, name varchar(4096), display varchar(4096), flags varchar(256), unique(dir, name))",
 		"create table normal_link (from_id integer, to_id integer, unique(from_id, to_id))",
@@ -332,11 +355,13 @@ int tup_db_create(int db_sync, int memory_db)
 	if(memory_db) {
 		dbname = ":memory:";
 	} else {
-		dbname = TUP_DB_FILE;
+		dbname = get_db_path(db_path, sizeof(db_path));
+		if(!dbname)
+			return -1;
 	}
 	rc = sqlite3_open(dbname, &tup_db);
 	if(rc == 0) {
-		printf(".tup repository initialized: %s\n", dbname);
+		printf(".metatup repository initialized: %s\n", dbname);
 	} else {
 		fprintf(stderr, "Unable to create database: %s\n",
 			sqlite3_errmsg(tup_db));
@@ -373,6 +398,8 @@ int tup_db_create(int db_sync, int memory_db)
 static int db_backup(int version)
 {
 	char backup[256];
+	char db_path[PATH_MAX];
+	const char *dbname;
 	int fd;
 	int ifd;
 	int rc;
@@ -386,7 +413,7 @@ static int db_backup(int version)
 	if(tup_db_close() < 0)
 		return -1;
 
-	if(snprintf(backup, sizeof(backup), ".tup/db_backup_%i", version) >=
+	if(snprintf(backup, sizeof(backup), ".metatup/db_backup_%i", version) >=
 	   (signed)sizeof(backup)) {
 		fprintf(stderr, "tup internal error: db backup buffer mis-sized.\n");
 		return -1;
@@ -396,9 +423,12 @@ static int db_backup(int version)
 		perror(backup);
 		return -1;
 	}
-	ifd = open(TUP_DB_FILE, O_RDONLY);
+	dbname = get_db_path(db_path, sizeof(db_path));
+	if(!dbname)
+		goto err_open;
+	ifd = open(dbname, O_RDONLY);
 	if(ifd < 0) {
-		perror(TUP_DB_FILE);
+		perror(dbname);
 		goto err_open;
 	}
 	while(1) {
@@ -667,7 +697,7 @@ static int version_check(void)
 	if(tup_db_config_get_int("db_version", -1, &version) < 0)
 		return -1;
 	if(version < 0) {
-		fprintf(stderr, "Error getting .tup/db version.\n");
+		fprintf(stderr, "Error getting .metatup/db version.\n");
 		return -1;
 	}
 
@@ -718,7 +748,7 @@ static int version_check(void)
 			return -1;
 		if(tup_db_begin() < 0)
 			return -1;
-		printf("Database update successful. You can remove the backup database file in the .tup/ directory if everything appears to be working.\n");
+		printf("Database update successful. You can remove the backup database file in the .metatup/ directory if everything appears to be working.\n");
 	}
 
 	if(tup_db_config_get_int("parser_version", 0, &version) < 0)
@@ -4808,7 +4838,7 @@ static struct var_entry *get_var_id(struct vardb *vdb, struct tup_entry *tent,
 
 	dbrc = sqlite3_step(*stmt);
 	if(dbrc == SQLITE_DONE) {
-		fprintf(stderr,"tup error: Variable id %lli not found in .tup/db.\n", tent->tnode.tupid);
+		fprintf(stderr,"tup error: Variable id %lli not found in .metatup/db.\n", tent->tnode.tupid);
 		goto out_reset;
 	}
 	if(dbrc != SQLITE_ROW) {

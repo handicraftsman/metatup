@@ -19,7 +19,7 @@
 # Make sure 'tup upd foo.c; tup upd foo.o' will still update the object file.
 
 . ./tup.sh
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 
 echo "int main(void) {}" > foo.c
 update

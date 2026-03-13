@@ -35,6 +35,7 @@
 #define KEEP_NODES 0
 #define EXPAND_NODES 1
 #define EXPAND_NODES_SRC 2
+#define EXPAND_NODES_CMD 3
 
 #define parser_error(tf, err_string) fprintf((tf)->f, "%s: %s\n", (err_string), strerror(errno));
 
@@ -43,6 +44,8 @@ struct tup_entry;
 struct graph;
 struct parser_server;
 struct lua_State;
+struct tup_function_registry;
+struct tup_func_frame;
 
 struct tupfile {
 	struct tup_entry *tent;
@@ -71,6 +74,10 @@ struct tupfile {
 	int use_server;
 	int full_deps;
 	int including_rules;
+	int in_function_body;
+	int in_rules_block;
+	struct tup_function_registry *function_registry;
+	struct tup_func_frame *func_frame;
 
 	SLIST_ENTRY(tupfile) list;
 };
@@ -133,6 +140,7 @@ struct path_list {
 	/* For exclusions: */
 	pcre2_code *re;
 	pcre2_match_data *re_match;
+	int tent_relative;
 
 	/* Copy of the full string */
 	char mem[0];
@@ -182,6 +190,8 @@ struct graph;
 struct timespan;
 
 void parser_debug_run(void);
+void parser_reset_tupbuild_flags(void);
+int parser_get_auto_compiledb(void);
 int parse(struct node *n, struct graph *g, struct timespan *ts, int refactoring, int use_server, int full_deps);
 char *eval(struct tupfile *tf, const char *string, int allow_nodes);
 

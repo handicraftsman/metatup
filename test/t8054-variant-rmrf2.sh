@@ -40,9 +40,9 @@ tup variant configs/*.config
 update
 
 rm -rf build-foo build-bar build-baz build-zap build-zng
-update > .tup/.tupoutput
+update > .metatup/.tupoutput
 
-if ! grep "No Tupfiles to parse" .tup/.tupoutput > /dev/null; then
+if ! grep "No Tupfiles to parse" .metatup/.tupoutput > /dev/null; then
 	echo "Error: Expected not to parse any Tupfiles" 1>&2
 	exit 1
 fi

@@ -32,11 +32,11 @@ cat > Tupfile << HERE
 : |> ^s^ sh ok1.sh %o |> output
 : output |> ^s^ sh ok2.sh |>
 HERE
-update > .tup/output
+update > .metatup/output
 
-if ! cat .tup/output | awk '/first output/{x=1} /sh ok1.sh output/{if(x == 1) {x=2}} /second output/{if(x == 2) {x=3}} /sh ok2.sh/{if(x == 3) {x=4}} END{if(x != 4) {print "Expected to match lines in order."; exit 1}}'; then
+if ! cat .metatup/output | awk '/first output/{x=1} /sh ok1.sh output/{if(x == 1) {x=2}} /second output/{if(x == 2) {x=3}} /sh ok2.sh/{if(x == 3) {x=4}} END{if(x != 4) {print "Expected to match lines in order."; exit 1}}'; then
 	echo "Output: "
-	cat .tup/output
+	cat .metatup/output
 	exit 1
 fi
 

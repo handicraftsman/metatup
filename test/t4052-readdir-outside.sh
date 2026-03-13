@@ -16,7 +16,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# Make sure we can readdir() outside the .tup hierarchy during parsing, even if
+# Make sure we can readdir() outside the .metatup hierarchy during parsing, even if
 # we are still inside the fuse filesystem.
 
 . ./tup.sh

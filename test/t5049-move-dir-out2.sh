@@ -24,8 +24,8 @@ mkdir real
 cd real
 re_init
 mkdir sub
-echo ': |> echo blah |>' > sub/Test.tup
-echo 'include sub/Test.tup' > Tupfile
+echo ': |> echo blah |>' > sub/Test.metatup
+echo 'include sub/Test.metatup' > Tupfile
 update
 
 mv sub ..

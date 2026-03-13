@@ -28,12 +28,12 @@ HERE
 mkdir sub
 cat > sub/Tupfile << HERE
 include_rules
-include \$(GITTUP_ROOT)/lib/lib.tup
+include \$(GITTUP_ROOT)/lib/lib.metatup
 : |> echo \$(CFLAGS) |>
 HERE
 
 mkdir lib
-cat > lib/lib.tup << HERE
+cat > lib/lib.metatup << HERE
 CFLAGS += -I\$(TUP_CWD)
 CFLAGS += -I\$(TUP_VARIANTDIR)
 HERE

@@ -29,7 +29,7 @@ touch input.txt
 update --debug-logging
 
 tup graph input.txt > ok.dot
-for i in ok.dot .tup/log/update.dot.0; do
+for i in ok.dot .metatup/log/update.dot.0; do
 	if cat $i | grep -- '->' | sort | uniq -c | awk '{print $1}' | grep 2 > /dev/null; then
 		echo "Error: Shouldn't have more than one unique link in graph [$i]: " 1>&2
 		cat $i 1>&2

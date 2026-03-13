@@ -20,7 +20,7 @@
 # files.
 
 . ./tup.sh
-cat > .tup/options << HERE
+cat > .metatup/options << HERE
 [display]
 job_numbers = 1
 HERE
@@ -33,10 +33,10 @@ update
 
 for i in `seq 1 4`; do touch in$i.out.txt; done
 echo "" > Tupfile
-update > .tup/output.txt
+update > .metatup/output.txt
 
-if ! grep '0) rm: ' .tup/output.txt > /dev/null; then
-	cat .tup/output.txt
+if ! grep '0) rm: ' .metatup/output.txt > /dev/null; then
+	cat .metatup/output.txt
 	echo "Error: Never got to 0 when removing files." 1>&2
 	exit 1
 fi

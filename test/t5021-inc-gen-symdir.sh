@@ -25,14 +25,14 @@ check_no_windows symlink
 
 mkdir foo
 mkdir foo/arch-x86
-echo 'var = 3' > foo/arch-x86/rules.tup
+echo 'var = 3' > foo/arch-x86/rules.metatup
 cat > foo/Tupfile << HERE
 : arch-x86 |> ln -s %f %o |> arch
 HERE
 update
 
 cat > Tupfile << HERE
-include foo/arch/rules.tup
+include foo/arch/rules.metatup
 HERE
 update_fail
 

@@ -19,8 +19,8 @@
 # Make sure 'tup dbconfig' works.
 . ./tup.sh
 
-tup dbconfig > .tup/out.txt 2>&1
-gitignore_good db_version .tup/out.txt
-gitignore_good parser_version .tup/out.txt
+tup dbconfig > .metatup/out.txt 2>&1
+gitignore_good db_version .metatup/out.txt
+gitignore_good parser_version .metatup/out.txt
 
 eotup

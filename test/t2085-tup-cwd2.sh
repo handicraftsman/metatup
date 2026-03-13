@@ -21,11 +21,11 @@
 . ./tup.sh
 check_no_windows paths # The path frobbing in node_exists() breaks this test
 cat > Tupfile << HERE
-include test1.tup
+include test1.metatup
 cflags += \$(TUP_CWD)
 : |> echo \$(cflags) |>
 HERE
-cat > test1.tup << HERE
+cat > test1.metatup << HERE
 cflags += \$(TUP_CWD)
 HERE
 parse
@@ -33,34 +33,34 @@ tup_object_exist . 'echo . .'
 
 mkdir foo
 mkdir foo/bar
-mv test1.tup foo
+mv test1.metatup foo
 
 cat > Tupfile << HERE
-include foo/test1.tup
+include foo/test1.metatup
 cflags += \$(TUP_CWD)
 : |> echo \$(cflags) |>
 HERE
 parse
 tup_object_exist . 'echo foo .'
 
-echo 'include bar/test2.tup' > foo/test1.tup
-echo 'cflags += $(TUP_CWD)' > foo/bar/test2.tup
+echo 'include bar/test2.metatup' > foo/test1.metatup
+echo 'cflags += $(TUP_CWD)' > foo/bar/test2.metatup
 parse
 tup_object_exist . 'echo foo/bar .'
 
 rm Tupfile
 cat > foo/Tupfile << HERE
-include ../test1.tup
+include ../test1.metatup
 cflags += \$(TUP_CWD)
 : |> echo \$(cflags) |>
 HERE
-echo 'cflags += $(TUP_CWD)' > test1.tup
+echo 'cflags += $(TUP_CWD)' > test1.metatup
 parse
 tup_object_exist foo 'echo .. .'
 
 mv foo/Tupfile foo/bar/Tupfile
-echo 'include ../test2.tup' > foo/test1.tup
-echo 'cflags += $(TUP_CWD)' > test2.tup
+echo 'include ../test2.metatup' > foo/test1.metatup
+echo 'cflags += $(TUP_CWD)' > test2.metatup
 parse
 tup_object_exist foo/bar 'echo ../.. .'
 

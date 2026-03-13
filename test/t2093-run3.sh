@@ -29,11 +29,11 @@ done
 HERE
 chmod +x sub/gen.sh
 
-cat > sub/inc.tup << HERE
+cat > sub/inc.metatup << HERE
 run \$(TUP_CWD)/gen.sh
 HERE
 cat > Tupfile << HERE
-include sub/inc.tup
+include sub/inc.metatup
 HERE
 touch foo.c bar.c
 update

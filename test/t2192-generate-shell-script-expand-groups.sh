@@ -21,7 +21,7 @@
 . ./tup.sh
 
 # 'tup generate' runs without a tup directory
-rm -rf .tup
+rm -rf .metatup
 
 cat > Tupfile << HERE
 : |> echo "asdf" > a |> a <foo>

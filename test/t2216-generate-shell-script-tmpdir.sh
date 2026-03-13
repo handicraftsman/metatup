@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # Try to generate a shell script that builds the project in a tmp directory
-# (with no .tup hierarchy anywhere). Mostly this verifies Windows tmpfile()
+# (with no .metatup hierarchy anywhere). Mostly this verifies Windows tmpfile()
 # usage.
 
 . ./tup.sh

@@ -16,7 +16,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# Make sure 'tup init' returns a 1 if a .tup dir already exists, and 0 if we
+# Make sure 'tup init' returns a 1 if a .metatup dir already exists, and 0 if we
 # force.
 . ./tup.sh
 
@@ -29,8 +29,8 @@ if ! tup init --force foo/bar/baz; then
 	echo "Error: Expected 'tup init --force' to succeed" 1>&2
 	exit 1
 fi
-if [ ! -f "foo/bar/baz/.tup/db" ]; then
-	echo "foo/bar/baz/.tup/db not created!" 1>&2
+if [ ! -f "foo/bar/baz/.metatup/db" ]; then
+	echo "foo/bar/baz/.metatup/db not created!" 1>&2
 	exit 1
 fi
 

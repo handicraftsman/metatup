@@ -29,7 +29,7 @@ cat > Tupfile << HERE
 : |> echo yo > %o |> out.txt
 : |> echo hey > %o |> out2.txt
 HERE
-touch .tup/tmp/0
+touch .metatup/tmp/0
 update
 
 eotup

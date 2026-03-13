@@ -44,7 +44,7 @@ int tup_init(int argc, char **argv)
 	if(find_tup_dir() != 0) {
 		fprintf(stderr, "tup %s usage: tup [args]\n", tup_version);
 		fprintf(stderr, "For information on Tupfiles and other commands, see the tup(1) man page.\n");
-		fprintf(stderr, "No .tup directory found. Either create a Tupfile.ini file at the top of your project, or manually run 'tup init' there.\n");
+		fprintf(stderr, "No .metatup directory found. Either create a Tupfile.ini file at the top of your project, or manually run 'tup init' there.\n");
 		return -1;
 	}
 	if(tup_option_init(argc, argv) < 0) {

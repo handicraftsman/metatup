@@ -6,9 +6,9 @@
 
 CFLAGS="-g" ./build.sh
 
-if [ ! -d .tup ]; then
-	./build/tup init
+if [ ! -d .metatup ]; then
+	./build/metatup init
 fi
-./build/tup generate --verbose build-nofuse.sh
+./build/metatup generate --verbose build-nofuse.sh
 ./build-nofuse.sh
-echo "Build complete. If ./tup works, you can remove the 'build' directory."
+echo "Build complete. If ./metatup works, you can remove the 'build' directory."

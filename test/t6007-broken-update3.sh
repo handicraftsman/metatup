@@ -22,7 +22,7 @@
 # marked MODIFY, changing the Tupfile will re-create the command, and end up
 # setting the command's flags to NONE, so it doesn't get executed. Whoops.
 . ./tup.sh
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 
 echo "int main(void) {}" > foo.c
 update

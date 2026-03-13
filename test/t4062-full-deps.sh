@@ -23,7 +23,7 @@ check_tup_suid
 
 set_full_deps
 
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 
 echo "int main(void) {}" > foo.c
 tup parse > .output.txt 2>&1

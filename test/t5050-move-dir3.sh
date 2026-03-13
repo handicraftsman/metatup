@@ -18,19 +18,19 @@
 
 # Make sure when moving a directory, that any Tupfiles in that directory cause
 # the dependent Tupfiles to be re-parsed. In this case, the top-level Tupfile
-# should be re-parsed and fail because a/a2/Test.tup no longer exists.
+# should be re-parsed and fail because a/a2/Test.metatup no longer exists.
 . ./tup.sh
 mkdir a
 mkdir a/a2
-echo 'x = 5' > a/a2/Test.tup
-echo 'include a/a2/Test.tup' > Tupfile
+echo 'x = 5' > a/a2/Test.metatup
+echo 'include a/a2/Test.metatup' > Tupfile
 
 update
 
 mv a b
 update_fail
 
-echo 'include b/a2/Test.tup' > Tupfile
+echo 'include b/a2/Test.metatup' > Tupfile
 update
 
 eotup

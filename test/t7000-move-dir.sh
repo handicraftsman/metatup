@@ -20,7 +20,7 @@
 check_monitor_supported
 monitor
 mkdir a
-cp ../testTupfile.tup a/Tupfile
+cp ../testTupfile.metatup a/Tupfile
 
 echo "int main(void) {return 0;}" > a/foo.c
 update

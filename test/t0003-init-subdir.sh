@@ -19,8 +19,8 @@
 . ./tup.sh
 
 tup init --force foo/bar/baz
-if [ ! -f "foo/bar/baz/.tup/db" ]; then
-	echo "foo/bar/baz/.tup/db not created!" 1>&2
+if [ ! -f "foo/bar/baz/.metatup/db" ]; then
+	echo "foo/bar/baz/.metatup/db not created!" 1>&2
 	exit 1
 fi
 

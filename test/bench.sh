@@ -37,7 +37,7 @@ for i in $files; do
 		echo "$t"
 		exit 1
 	fi
-	d=`du -sk .tup | awk '{print $1}'`
+	d=`du -sk .metatup | awk '{print $1}'`
 	echo ${t}s ${d}k
 	cd ..
 	rm -rf $testdir

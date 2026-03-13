@@ -23,7 +23,7 @@
 
 mkdir a
 mkdir a/b
-cp ../testTupfile.tup a/b/Tupfile
+cp ../testTupfile.metatup a/b/Tupfile
 
 echo "int main(void) {}" > a/b/foo.c
 update

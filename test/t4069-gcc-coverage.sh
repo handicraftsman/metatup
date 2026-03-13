@@ -51,8 +51,8 @@ HERE
 cp foo.c bar.c
 update
 
-if strings foo.exe | grep '\.tup/mnt' > /dev/null; then
-	echo "Error: 'foo' executable shouldn't reference .tup/mnt directory" 1>&2
+if strings foo.exe | grep '\.metatup/mnt' > /dev/null; then
+	echo "Error: 'foo' executable shouldn't reference .metatup/mnt directory" 1>&2
 	exit 1
 fi
 

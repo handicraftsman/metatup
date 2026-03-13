@@ -23,9 +23,9 @@
 check_monitor_supported
 monitor
 
-touch .tup/.options.swpx
+touch .metatup/.options.swpx
 tup flush
-rm .tup/.options.swpx
+rm .metatup/.options.swpx
 stop_monitor
 
 eotup

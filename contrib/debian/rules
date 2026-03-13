@@ -11,7 +11,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 	./build.sh
-	./build/tup generate runme.sh
+	./build/metatup generate runme.sh
 	./runme.sh
 	touch $@
 

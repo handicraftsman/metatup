@@ -1786,7 +1786,7 @@ static void mhandle_file(const char* file, const char* file2, enum access_type a
 {
 	DWORD save_error = GetLastError();
 
-	if(strncmp(file, "@tup@", 5) == 0) {
+	if(strncmp(file, "@metatup@", 5) == 0) {
 		int ret;
 		char buf[ACCESS_EVENT_MAX_SIZE];
 		struct access_event* e = (struct access_event*) buf;

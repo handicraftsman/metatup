@@ -35,7 +35,7 @@
 #include <errno.h>
 #include <signal.h>
 
-#define TUP_TMP ".tup/tmp"
+#define TUP_TMP ".metatup/tmp"
 
 static int initialize_depfile(struct server *s, char *depfile, HANDLE *h);
 static int process_depfile(struct server *s, HANDLE h);
@@ -107,11 +107,11 @@ int server_init(enum server_mode mode)
 	cwdlen = strlen(tuptmpdir);
 	/* 64 is generous room for the "\deps-%i" for depfiles */
 	if(cwdlen + 1 + sizeof(TUP_TMP) + 64 >= sizeof(tuptmpdir)) {
-		fprintf(stderr, "tup error: tuptmpdir[] is sized incorrectly for .tup/tmp\n");
+		fprintf(stderr, "tup error: tuptmpdir[] is sized incorrectly for .metatup/tmp\n");
 		return -1;
 	}
 	tuptmpdir[cwdlen] = '\\';
-	memcpy(tuptmpdir + cwdlen + 1, ".tup\\tmp", sizeof(TUP_TMP));
+	memcpy(tuptmpdir + cwdlen + 1, ".metatup\\tmp", sizeof(TUP_TMP));
 
 	if(fchdir(tup_top_fd()) < 0) {
 		perror("fchdir");
@@ -137,7 +137,7 @@ int server_init(enum server_mode mode)
 		if(f.filename[0] != '.') {
 			if(unlink(f.filename) != 0) {
 				perror(f.filename);
-				fprintf(stderr, "tup error: Unable to clean out a file in .tup/tmp directory. Please try cleaning this directory manually. Note there may be a stuck sub-process that still has the file open (check the Task Manager).\n");
+				fprintf(stderr, "tup error: Unable to clean out a file in .metatup/tmp directory. Please try cleaning this directory manually. Note there may be a stuck sub-process that still has the file open (check the Task Manager).\n");
 				return -1;
 			}
 		}
@@ -195,7 +195,7 @@ static int create_process(struct server *s, int dfd, char *cmdline,
 			fprintf(stderr, "tup error: Unable to chdir to the project root directory to create a temporary output file.\n");
 			return -1;
 		}
-		swprintf(buf, 64, L".tup\\tmp\\output-%i", s->id);
+		swprintf(buf, 64, L".metatup\\tmp\\output-%i", s->id);
 		buf[63] = 0;
 		sa.hStdOutput = CreateFile(buf, GENERIC_WRITE, 0, &sec, CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY, NULL);
 		if(sa.hStdOutput == INVALID_HANDLE_VALUE) {
@@ -382,7 +382,7 @@ int server_exec(struct server *s, int dfd, const char *cmd, struct tup_env *newe
 
 	if(!s->streaming_mode) {
 		char buf[64];
-		snprintf(buf, sizeof(buf), ".tup/tmp/output-%i", s->id);
+		snprintf(buf, sizeof(buf), ".metatup/tmp/output-%i", s->id);
 		buf[sizeof(buf)-1] = 0;
 		s->output_fd = openat(tup_top_fd(), buf, O_RDONLY);
 		if(s->output_fd < 0) {
@@ -430,7 +430,7 @@ int server_postexec(struct server *s)
 {
 	if(!s->streaming_mode) {
 		char buf[64];
-		snprintf(buf, sizeof(buf), ".tup/tmp/output-%i", s->id);
+		snprintf(buf, sizeof(buf), ".metatup/tmp/output-%i", s->id);
 		buf[sizeof(buf)-1] = 0;
 		if(unlinkat(tup_top_fd(), buf, 0) < 0) {
 			pthread_mutex_lock(s->error_mutex);

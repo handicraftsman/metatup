@@ -34,8 +34,8 @@ update_partial final2.txt
 check_not_exist tmp1.txt
 check_exist tmp2.txt
 
-update > .tup/.tupoutput
-if grep 'cp tmp2.txt final2.txt' .tup/.tupoutput; then
+update > .metatup/.tupoutput
+if grep 'cp tmp2.txt final2.txt' .metatup/.tupoutput; then
 	echo "Error: Shouldn't re-copy tmp2.txt to final2.txt" 1>&2
 	exit 1
 fi

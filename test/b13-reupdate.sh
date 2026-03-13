@@ -1,6 +1,6 @@
 #! /bin/sh -e
 
-cp ../testTupfile.tup ./Tupfile
+cp ../testTupfile.metatup ./Tupfile
 for i in `seq 1 $1`; do echo "void foo$i(void) {}" > $i.c; done
 seq 1 $1 | sed 's/$/.c/' | xargs touch
 echo "int main(void) {}" >> 1.c

@@ -24,9 +24,9 @@ cat > Tupfile << HERE
 : foreach *.c |> gcc -c %f -o %o |> %B.o
 HERE
 touch foo.c bar.c
-compiledb 2> .tup/output.txt
+compiledb 2> .metatup/output.txt
 
-if ! grep 'tup warning: No commands exported' .tup/output.txt > /dev/null; then
+if ! grep 'tup warning: No commands exported' .metatup/output.txt > /dev/null; then
 	echo "Error: Expected warning for no commands." 1>&2
 	exit 1
 fi

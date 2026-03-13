@@ -28,12 +28,12 @@ HERE
 mkdir init
 cat > init/Tupfile << HERE
 include_rules
-include \$(MY_ROOT)/proj/install.tup
+include \$(MY_ROOT)/proj/install.metatup
 HERE
 
 mkdir proj
 mkdir proj/gen
-cat > proj/install.tup << HERE
+cat > proj/install.metatup << HERE
 : |> touch %o |> gen
 HERE
 

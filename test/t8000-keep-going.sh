@@ -17,7 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 . ./tup.sh
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 
 # Since the 'foreach *.c' in the Tupfile will process the files in alphabetical
 # order, these files should be built in the order (bar.c, foo.c, zap.c). Then

@@ -22,11 +22,11 @@
 mkdir build
 
 cat > Tuprules.tup << HERE
-include rules/stuff.tup
+include rules/stuff.metatup
 HERE
 
 mkdir rules
-cat > rules/stuff.tup << HERE
+cat > rules/stuff.metatup << HERE
 CFLAGS += CWD=\$(TUP_CWD)
 CFLAGS += VARIANTDIR=\$(TUP_VARIANTDIR)
 CFLAGS += VARIANT_OUTPUTDIR=\$(TUP_VARIANT_OUTPUTDIR)

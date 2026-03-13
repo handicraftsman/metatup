@@ -30,7 +30,7 @@ check()
 . ./tup.sh
 
 check keep_going 0
-cat > .tup/options << HERE
+cat > .metatup/options << HERE
 [updater]
 keep_going = 1
 HERE

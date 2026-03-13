@@ -30,7 +30,7 @@ def config_var(key):
     global tup_entry_size
 
     try:
-        f = open("@tup@/" + key, "r");
+        f = open("@metatup@/" + key, "r");
     except IOError:
         pass
 

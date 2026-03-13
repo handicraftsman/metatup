@@ -27,10 +27,10 @@ mkdir sw
 mkdir lib
 
 cat > Tuprules.tup << HERE
-&lib_tupfile = lib/lib.tup
+&lib_tupfile = lib/lib.metatup
 HERE
 
-cat > lib/lib.tup << HERE
+cat > lib/lib.metatup << HERE
 static_libs += \$(TUP_CWD)/lib.a
 HERE
 

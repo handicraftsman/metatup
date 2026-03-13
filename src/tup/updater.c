@@ -188,6 +188,7 @@ int updater(int argc, char **argv, int phase)
 		phase = -phase;
 		refactoring = 1;
 	}
+	parser_reset_tupbuild_flags();
 
 	if(run_scan(do_scan) < 0)
 		return -1;
@@ -1350,6 +1351,10 @@ static int gitignore(struct tup_entry *tent)
 				perror("fprintf");
 				goto err_close;
 			}
+			if(fprintf(f, ".metatup\n") < 0) {
+				perror("fprintf");
+				goto err_close;
+			}
 		}
 		if(tup_db_write_gitignore(f, tent->tnode.tupid, skip_self) < 0)
 			goto err_close;
@@ -2305,7 +2310,7 @@ static int move_outputs(struct node *n)
 				fprintf(stderr, "tup error: curpath sized incorrectly in move_outputs()\n");
 				return -1;
 			}
-			if(snprintf(tmppath, sizeof(tmppath), ".tup/tmp/backup-%lli", output->tent->tnode.tupid) >= (int)sizeof(tmppath)) {
+			if(snprintf(tmppath, sizeof(tmppath), ".metatup/tmp/backup-%lli", output->tent->tnode.tupid) >= (int)sizeof(tmppath)) {
 				fprintf(stderr, "tup error: tmppath sized incorrectly in move_outputs()\n");
 				return -1;
 			}
@@ -2344,7 +2349,7 @@ static int restore_outputs(struct node *n)
 				fprintf(stderr, "tup error: curpath sized incorrectly in move_outputs()\n");
 				return -1;
 			}
-			if(snprintf(tmppath, sizeof(tmppath), ".tup/tmp/backup-%lli", output->tent->tnode.tupid) >= (int)sizeof(tmppath)) {
+			if(snprintf(tmppath, sizeof(tmppath), ".metatup/tmp/backup-%lli", output->tent->tnode.tupid) >= (int)sizeof(tmppath)) {
 				fprintf(stderr, "tup error: tmppath sized incorrectly in move_outputs()\n");
 				return -1;
 			}
@@ -2519,7 +2524,7 @@ static int check_outputs(struct node *n)
 				fprintf(stderr, "tup error: curpath sized incorrectly in move_outputs()\n");
 				return -1;
 			}
-			if(snprintf(tmppath, sizeof(tmppath), ".tup/tmp/backup-%lli", output->tent->tnode.tupid) >= (int)sizeof(tmppath)) {
+			if(snprintf(tmppath, sizeof(tmppath), ".metatup/tmp/backup-%lli", output->tent->tnode.tupid) >= (int)sizeof(tmppath)) {
 				fprintf(stderr, "tup error: tmppath sized incorrectly in move_outputs()\n");
 				return -1;
 			}
@@ -2786,7 +2791,7 @@ static int expand_res_file(struct estring *expanded_name,
 		tmp = tmp->parent;
 	}
 
-	snprintf(tmpfilename, TMPFILESIZE, ".tup/tmp/res-%i", resfile);
+	snprintf(tmpfilename, TMPFILESIZE, ".metatup/tmp/res-%i", resfile);
 	resfile++;
 	/* Use binary so newlines aren't converted on Windows.
 	 * Both cl and cygwin can handle UNIX line-endings, but

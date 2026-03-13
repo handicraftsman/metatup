@@ -29,10 +29,10 @@ update
 
 gitignore_good foo .gitignore
 
-parse > .tup/output.txt 2>&1
+parse > .metatup/output.txt 2>&1
 
-if grep 'generated -> normal: .gitignore' .tup/output.txt > /dev/null; then
-	cat .tup/output.txt
+if grep 'generated -> normal: .gitignore' .metatup/output.txt > /dev/null; then
+	cat .metatup/output.txt
 	echo "Error: .gitignore should not be converted to a normal file." 1>&1
 	exit 1
 fi

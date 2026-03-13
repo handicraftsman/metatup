@@ -2,9 +2,9 @@ include_rules
 
 ifeq ($(TUP_SERVER),ldpreload)
 ifeq ($(X86_ARCH_SIBLINGS),y)
-  : src/ldpreload/*.64.o |> !ld |> tup-ldpreload.so
+  : src/ldpreload/*.64.o |> !ld |> metatup-ldpreload.so
 else
-  : src/ldpreload/*.o |> !ld |> tup-ldpreload.so
+  : src/ldpreload/*.o |> !ld |> metatup-ldpreload.so
 endif
 endif
 
@@ -41,7 +41,7 @@ endif
 
 ifneq ($(TARGET),win32)
 ifeq (@(TUP_SUDO_SUID),y)
-suid = ; chown root:$(TUP_SUID_GROUP) tup; chmod u+s tup
+suid = ; chown root:$(TUP_SUID_GROUP) metatup; chmod u+s metatup
 endif
 
 ifeq ($(TUP_SERVER),fuse)
@@ -71,4 +71,4 @@ LDFLAGS += -Wl,--wrap=__mingw_vfprintf
 
 LDFLAGS += -Wl,-Bstatic -lpthread -Wl,-Bdynamic
 endif
-: $(srcs) src/lua/liblua.a |> ^ LINK %o^ ./src/tup/link.sh "$(CC)" "$(CFLAGS)" "$(LDFLAGS)" "%1o" "%2o" "%f" $(suid) |> tup$(PROGRAM_SUFFIX) tup-version.o
+: $(srcs) src/lua/liblua.a third-party/libyaml.a |> ^ LINK %o^ ./src/tup/link.sh "$(CC)" "$(CFLAGS)" "$(LDFLAGS)" "%1o" "%2o" "%f" $(suid) |> metatup$(PROGRAM_SUFFIX) tup-version.o

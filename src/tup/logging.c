@@ -33,8 +33,8 @@
 #include <sys/types.h>
 
 #define NUM_LOGS 20
-#define LOG_DIR ".tup/log"
-#define LOG_NAME ".tup/log/debug.log.0"
+#define LOG_DIR ".metatup/log"
+#define LOG_NAME ".metatup/log/debug.log.0"
 
 static int enabled = 0;
 static FILE *logfile = NULL;
@@ -173,7 +173,7 @@ void log_graph(struct graph *g, const char *name)
 {
 	if(enabled) {
 		char fullname[PATH_MAX];
-		if(snprintf(fullname, sizeof(fullname), "%s/.tup/log/%s.dot.0", get_tup_top(), name) >= (signed)sizeof(fullname)) {
+		if(snprintf(fullname, sizeof(fullname), "%s/.metatup/log/%s.dot.0", get_tup_top(), name) >= (signed)sizeof(fullname)) {
 			fprintf(stderr, "tup internal error: log graph name is sized incorrectly.\n");
 			return;
 		}

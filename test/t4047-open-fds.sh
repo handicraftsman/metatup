@@ -31,13 +31,13 @@ fi
 cat > Tupfile << HERE
 : |> ls -l /proc/self/fd > %o |> fds.txt
 HERE
-ls -l /proc/self/fd > .tup/curfds.txt
+ls -l /proc/self/fd > .metatup/curfds.txt
 update
 
 # On Gentoo, stdout points to output-0, while on Ubuntu, it points to the
 # redirected file (fds.txt). This might be a bash vs dash thing.
 cat fds.txt | grep -v ' 0 -> /dev/null' | grep -v ' 1 -> .*/output-' | grep -v ' 1 -> .*/fds.txt' | grep -v ' 2 -> .*/output' | grep -v ' 3 -> .*/deps-' | grep -v ' -> /proc/.*/fd' | while read i; do
-	if ! grep -F "$i" .tup/curfds.txt > /dev/null; then
+	if ! grep -F "$i" .metatup/curfds.txt > /dev/null; then
 		echo "Error: $i shouldn't be open" 1>&2
 		exit 1
 	fi

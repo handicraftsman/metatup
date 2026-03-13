@@ -53,6 +53,8 @@
 #include "tup/container.h"
 #include "tup/array_size.h"
 #include "tup/luaparser.h"
+#include "tup/parser.h"
+#include "tup/metatup.h"
 
 static struct help {
 	const char *command;
@@ -60,7 +62,7 @@ static struct help {
 	const char *args;
 	const char *desc;
 } helpers[] = {
-	{"init", NULL, "[directory]", "Creates a '.tup' directory in the specified directory and initializes the tup database. If a directory name is unspecified, it defaults to creating '.tup' in the current directory. This defines the top of your project, as viewed by tup."},
+	{"init", NULL, "[directory]", "Creates a '.metatup' directory in the specified directory and initializes the tup database. If a directory name is unspecified, it defaults to creating '.metatup' in the current directory. This defines the top of your project, as viewed by tup."},
 	{"upd", NULL, "[<output_1> ... <output_n>]", "Legacy secondary command. Calling 'tup upd' is equivalent to simply calling 'tup'."},
 	{"refactor", "ref", "", "The refactor command can be used to help refactor Tupfiles. This will cause tup to run through the parsing phase, but not execute any commands. If any Tupfiles that are parsed result in changes to the database, these are reported as errors."},
 	{"monitor", NULL, "", "*LINUX ONLY* Starts the inotify-based file monitor. The monitor must scan the filesystem once and initialize watches on each directory. Then when you make changes to the files, the monitor will see them and write them directly into the database. With the monitor running, 'tup' does not need to do the initial scan, and can start constructing the build graph immediately."},
@@ -71,6 +73,7 @@ static struct help {
 	{"graph", NULL, "[--dirs] [--ghosts] [--env] [--combine] [--stickies] [<output_1> ... <output_n>]", "Prints out a graphviz .dot format graph of the tup database to stdout. By default it only displays the parts of the graph that have changes. If you provide additional arguments, they are assumed to be files that you want to graph."},
 	{"todo", NULL, "[<output_1> ... <output_n>]", "Prints out the next steps in the tup process that will execute when updating the given outputs. If no outputs are specified then it prints the steps needed to update the whole project."},
 	{"generate", NULL, "[--config config-file] script.sh (or script.bat on Windows)", "The generate command will parse all Tupfiles and create a shell script that can build the program without running in a tup environment. The expected usage is in continuous integration environments that aren't compatible with tup's dependency checking (eg: if FUSE is not supported). On Windows, if the script filename has a \".bat\" extension, then the output will be a batch script instead of a shell script."},
+	{"gen", NULL, "<component> [name] [-P profilename] [-B key=value] [-O builddir] [-D ret[=path]] [--no-strict]", "Generates or updates TupBuild.yaml from MetaTup.yaml component definitions."},
 	{"varsed", NULL, "", "The varsed command is used as a subprogram in a Tupfile; you would not run it manually at the command-line. It is used to read one file, and replace any variable references and write the output to a second file. Variable references are of the form @VARIABLE@, and are replaced with the corresponding value of the @-variable."},
 	{"scan", NULL, "", "You shouldn't ever need to run this, unless you want to make the database reflect the filesystem before running 'tup graph'. Scan is called automatically by 'upd' if the monitor isn't running."},
 };
@@ -82,8 +85,9 @@ static int tupid(int argc, char **argv);
 static int inputs(int argc, char **argv);
 static int graph_cb(void *arg, struct tup_entry *tent);
 static int graph(int argc, char **argv);
-static int compiledb(int argc, char **argv);
+int tup_compiledb(int argc, char **argv);
 static int commandline(int argc, char **argv);
+static int write_compile_db_files(void);
 /* Testing commands */
 static int mlink(int argc, char **argv);
 static int variant(int argc, char **argv);
@@ -232,6 +236,10 @@ int main(int argc, char **argv)
 	} else if(strcmp(cmd, "server") == 0) {
 		printf("%s\n", TUP_SERVER);
 		return 0;
+	} else if(strcmp(cmd, "gen") == 0) {
+		if(metatup_gen(argc, argv) < 0)
+			return 1;
+		return 0;
 	}
 
 	/* Process all of the Tupfile.ini files. Runs `tup init' if necessary */
@@ -245,7 +253,7 @@ int main(int argc, char **argv)
 		if(tup_drop_privs() < 0)
 			return 1;
 		if(find_tup_dir() < 0) {
-			fprintf(stderr, "No .tup directory found - unable to stop the file monitor.\n");
+			fprintf(stderr, "No .metatup directory found - unable to stop the file monitor.\n");
 			return -1;
 		}
 		if(open_tup_top() < 0)
@@ -255,7 +263,7 @@ int main(int argc, char **argv)
 		if(tup_drop_privs() < 0)
 			return 1;
 		if(find_tup_dir() < 0) {
-			fprintf(stderr, "No .tup directory found - unable to stop the file monitor.\n");
+			fprintf(stderr, "No .metatup directory found - unable to stop the file monitor.\n");
 			return -1;
 		}
 		if(open_tup_top() < 0)
@@ -282,7 +290,7 @@ int main(int argc, char **argv)
 	} else if(strcmp(cmd, "graph") == 0) {
 		rc = graph(argc, argv);
 	} else if(strcmp(cmd, "compiledb") == 0) {
-		rc = compiledb(argc, argv);
+		rc = tup_compiledb(argc, argv);
 	} else if(strcmp(cmd, "commandline") == 0) {
 		rc = commandline(argc, argv);
 	} else if(strcmp(cmd, "scan") == 0) {
@@ -303,11 +311,15 @@ int main(int argc, char **argv)
 		rc = updater(argc, argv, 2);
 	} else if(strcmp(cmd, "upd") == 0) {
 		rc = updater(argc, argv, 0);
+		if(rc == 0 && parser_get_auto_compiledb())
+			rc = write_compile_db_files();
 	} else if(strcmp(cmd, "refactor") == 0 ||
 		  strcmp(cmd, "ref") == 0) {
 		rc = updater(argc, argv, -2);
 	} else if(strcmp(cmd, "autoupdate") == 0) {
 		rc = updater(argc, argv, 0);
+		if(rc == 0 && parser_get_auto_compiledb())
+			rc = write_compile_db_files();
 		clear_autoupdate = 1;
 	} else if(strcmp(cmd, "autoparse") == 0) {
 		rc = updater(argc, argv, 2);
@@ -664,13 +676,9 @@ static int graph(int argc, char **argv)
 	return 0;
 }
 
-static int compiledb(int argc, char **argv)
+static int write_compile_db_files(void)
 {
-	int rc;
 	struct variant *variant;
-	rc = updater(argc, argv, 2);
-	if(rc < 0)
-		return -1;
 
 	LIST_FOREACH(variant, get_variant_list(), list) {
 		if(variant->enabled) {
@@ -692,6 +700,15 @@ static int compiledb(int argc, char **argv)
 		}
 	}
 	return 0;
+}
+
+int tup_compiledb(int argc, char **argv)
+{
+	int rc;
+	rc = updater(argc, argv, 2);
+	if(rc < 0)
+		return -1;
+	return write_compile_db_files();
 }
 
 static int commandline(int argc, char **argv)

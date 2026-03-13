@@ -19,7 +19,7 @@
 # Try out 'tup todo'
 
 . ./tup.sh
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 
 echo "int main(void) {}" > foo.c
 echo "void bar1(void) {}" > bar.c

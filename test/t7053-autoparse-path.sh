@@ -29,11 +29,11 @@ mkdir a
 mkdir b
 
 cat > a/run.sh << HERE
-echo arun >> .tup/.run.out
+echo arun >> .metatup/.run.out
 HERE
 
 cat > b/run.sh << HERE
-echo 'brun' >> .tup/.run.out
+echo 'brun' >> .metatup/.run.out
 HERE
 chmod +x a/run.sh b/run.sh
 
@@ -51,15 +51,15 @@ tup
 touch Tupfile
 tup
 
-if [ "$(grep -c arun .tup/.run.out)" != 0 ]; then
+if [ "$(grep -c arun .metatup/.run.out)" != 0 ]; then
     echo "Error: Expected a/run.sh to never run." 1>&2
-    cat .tup/.run.out 1>&2
+    cat .metatup/.run.out 1>&2
     exit 1
 fi
 
-if [ "$(grep -c brun .tup/.run.out)" != 1 ]; then
+if [ "$(grep -c brun .metatup/.run.out)" != 1 ]; then
     echo "Error: Expected b/run.sh to run once." 1>&2
-    cat .tup/.run.out 1>&2
+    cat .metatup/.run.out 1>&2
     exit 1
 fi
 

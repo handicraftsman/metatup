@@ -16,19 +16,19 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# Make sure if we rm the .tup/db file then the monitor shuts down.
+# Make sure if we rm the .metatup/db file then the monitor shuts down.
 
 . ./tup.sh
 check_monitor_supported
 monitor
 
-rm .tup/db
+rm .metatup/db
 x=0
 max=5
 if [ "$TUP_VALGRIND" = "1" ]; then
 	max=500
 fi
-while ! grep "\-1" .tup/monitor.pid > /dev/null; do
+while ! grep "\-1" .metatup/monitor.pid > /dev/null; do
 	sleep 0.1
 	x=$((x+1))
 	if [ $x -gt $max ]; then

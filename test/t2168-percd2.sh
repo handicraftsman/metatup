@@ -20,16 +20,16 @@
 
 . ./tup.sh
 
-cat > build.tup << HERE
+cat > build.metatup << HERE
 : |> touch %o |> %d.lib
 HERE
 mkdir foo
 cat > foo/Tupfile << HERE
-include ../build.tup
+include ../build.metatup
 HERE
 mkdir bar
 cat > bar/Tupfile << HERE
-include ../build.tup
+include ../build.metatup
 HERE
 parse
 

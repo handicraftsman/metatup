@@ -143,7 +143,7 @@ static int update_map(pid_t pid, const char *mapfile, uid_t id)
 
 static void disable_namespacing_hint(void)
 {
-	fprintf(stderr, "tup warning: Trying without namespacing enabled. Subprocesses will have '.tup/mnt' paths for the current working directory and some dependencies may be missed.\n");
+	fprintf(stderr, "tup warning: Trying without namespacing enabled. Subprocesses will have '.metatup/mnt' paths for the current working directory and some dependencies may be missed.\n");
 	fprintf(stderr, "You may need to update the apparmor profile in order to enable namespacing properly in tup (make sure the path in apparmor matches the path of the tup executable), or you can run tup with TUP_NO_NAMESPACING=1 to disable this warning.\n");
 }
 
@@ -380,7 +380,7 @@ static int setup_subprocess(struct execmsg *em, const char *job, const char *dir
 	if(!em->streaming_mode) {
 		int ofd, efd;
 		char buf[64];
-		snprintf(buf, sizeof(buf), ".tup/tmp/output-%lli", em->sid);
+		snprintf(buf, sizeof(buf), ".metatup/tmp/output-%lli", em->sid);
 		buf[sizeof(buf)-1] = 0;
 		ofd = creat(buf, 0600);
 		if(ofd < 0) {
@@ -397,7 +397,7 @@ static int setup_subprocess(struct execmsg *em, const char *job, const char *dir
 		if(em->single_output) {
 			efd = ofd;
 		} else {
-			snprintf(buf, sizeof(buf), ".tup/tmp/errors-%lli", em->sid);
+			snprintf(buf, sizeof(buf), ".metatup/tmp/errors-%lli", em->sid);
 			buf[sizeof(buf)-1] = 0;
 			efd = creat(buf, 0600);
 			if(efd < 0) {

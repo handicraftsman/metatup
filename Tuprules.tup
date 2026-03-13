@@ -106,12 +106,15 @@ ifneq (@(TUP_USE_SYSTEM_INIH),y)
 CFLAGS += -I$(TUP_CWD)/src/inih
 endif
 
+CFLAGS += -I$(TUP_CWD)/third-party/libyaml/include
+CFLAGS += -DYAML_DECLARE_STATIC
+
 ifeq ($(TUP_SERVER),ldpreload)
 FPIC = -fpic
 SHARED = -shared
 
-LDFLAGS_tup-ldpreload.so += $(FPIC)
-LDFLAGS_tup-ldpreload.so += $(SHARED)
-LDFLAGS_tup-ldpreload.so += -ldl
-LDFLAGS_tup-ldpreload.so += -pthread
+LDFLAGS_metatup-ldpreload.so += $(FPIC)
+LDFLAGS_metatup-ldpreload.so += $(SHARED)
+LDFLAGS_metatup-ldpreload.so += -ldl
+LDFLAGS_metatup-ldpreload.so += -pthread
 endif

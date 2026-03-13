@@ -35,7 +35,7 @@ output="$tupcurdir/$tuptestdir/output.txt"
 touch Tupfile.ini
 tup > $output
 
-if ! grep 'Initializing .tup in.*tup-t4159' $output > /dev/null; then
+if ! grep 'Initializing .metatup in.*tup-t4159' $output > /dev/null; then
 	echo "Error: Expecting tup to initialize" 1>&2
 	exit 1
 fi

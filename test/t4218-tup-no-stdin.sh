@@ -18,7 +18,7 @@
 
 # Make sure tup doesn't fail if stdin is closed before running.
 . ./tup.sh
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 
 echo "int main(void) {}" > foo.c
 # Run update with stdin closed.

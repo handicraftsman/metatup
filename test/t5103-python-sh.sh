@@ -26,7 +26,7 @@ HERE
 touch foo.c
 cat > run.py << HERE
 import sh
-sh.tup('upd')
+sh.metatup('upd')
 HERE
 python3 run.py
 

@@ -23,7 +23,7 @@ check_no_windows process
 
 config()
 {
-	cat > .tup/options << HERE
+	cat > .metatup/options << HERE
 [updater]
 num_jobs=$1
 keep_going=$2

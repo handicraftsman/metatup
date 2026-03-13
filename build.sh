@@ -15,6 +15,8 @@ server=${TUP_SERVER:-$default_server}
 plat_cflags="-Os"
 plat_ldflags=""
 plat_files=""
+yaml_cflags="`pkg-config yaml-0.1 --cflags`"
+yaml_ldflags="`pkg-config yaml-0.1 --libs`"
 if [ "$server" = "fuse" ]; then
 	plat_cflags="`pkg-config fuse --cflags`"
 	plat_ldflags="`pkg-config fuse --libs`"
@@ -97,9 +99,9 @@ done
 echo "  bootstrap CC $CFLAGS ../src/sqlite3/sqlite3.c"
 $CC $CFLAGS -c ../src/sqlite3/sqlite3.c -DSQLITE_TEMP_STORE=2 -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION $plat_cflags
 
-echo "  bootstrap LD tup $LDFLAGS"
+echo "  bootstrap LD metatup $LDFLAGS"
 objs="$(echo *.o)"
-../src/tup/link.sh "$CC" "$CFLAGS -I../src" "-lpthread $plat_ldflags $LDFLAGS" "tup" "tup-version.o" "$objs" "$label"
+../src/tup/link.sh "$CC" "$CFLAGS -I../src $yaml_cflags" "-lpthread $plat_ldflags $yaml_ldflags $LDFLAGS" "metatup" "tup-version.o" "$objs" "$label"
 
 if [ "$server" = "ldpreload" ]; then
 	mkdir ldpreload
@@ -109,8 +111,8 @@ if [ "$server" = "ldpreload" ]; then
 		echo "  bootstrap CC $CFLAGS $i"
 		$CC $CFLAGS -c $i -I../../src $plat_cflags -o `basename $i`.64.o -pthread
 	done
-	echo "  bootstrap LD tup-ldpreload.so"
-	$CC *.o -o ../tup-ldpreload.so -fpic -shared -ldl $plat_ldflags $LDFLAGS -pthread
+	echo "  bootstrap LD metatup-ldpreload.so"
+	$CC *.o -o ../metatup-ldpreload.so -fpic -shared -ldl $plat_ldflags $LDFLAGS -pthread
 	cd ..
 fi
 

@@ -47,7 +47,7 @@
 #endif
 #include <sys/wait.h>
 
-#define TUP_MNT ".tup/mnt"
+#define TUP_MNT ".metatup/mnt"
 
 static void sighandler(int sig);
 
@@ -165,7 +165,7 @@ static int tup_unmount(void)
 		rc = os_unmount();
 	}
 	if(rc != 0) {
-		fprintf(stderr, "tup error: Unable to unmount the fuse file-system on .tup/mnt (return code = %i). You may have to unmount this manually as root: umount -f .tup/mnt\n", rc);
+		fprintf(stderr, "tup error: Unable to unmount the fuse file-system on .metatup/mnt (return code = %i). You may have to unmount this manually as root: umount -f .metatup/mnt\n", rc);
 		return -1;
 	}
 	return 0;
@@ -253,7 +253,7 @@ int server_init(enum server_mode mode)
 #ifdef __APPLE__
 		/* MacOSX is a wayward beast. On a filesystem mount event it notifies several processes such as
 		 * antivirus scanner, file content indexer.
-		 * The content indexer (Spotlight) creates a root-owned directory that keeps index data (.tup/mnt/.Spotlight-V100).
+		 * The content indexer (Spotlight) creates a root-owned directory that keeps index data (.metatup/mnt/.Spotlight-V100).
 		 * To prevent it we use "nobrowse" fuse4x flag - it tells Spotlight to skip the fs.
 		 * Unfortunately it does not help in case of a short-living filesystems (e.g. in tup tests).
 		 * Tup mounts and then quickly unmounts the fs and when Sportlight checks "nobrowse" flag on a filesystem
@@ -292,7 +292,7 @@ int server_init(enum server_mode mode)
 		if(f.filename[0] != '.') {
 			if(unlink(f.filename) != 0) {
 				perror(f.filename);
-				fprintf(stderr, "tup error: Unable to clean out a file in .tup/tmp directory. Please try cleaning this directory manually.\n");
+				fprintf(stderr, "tup error: Unable to clean out a file in .metatup/tmp directory. Please try cleaning this directory manually.\n");
 				return -1;
 			}
 		}
@@ -319,7 +319,7 @@ int server_init(enum server_mode mode)
 	{
 		int x;
 		char filename[PATH_MAX];
-		snprintf(filename, sizeof(filename), ".tup/mnt%s/@tup@", get_tup_top());
+		snprintf(filename, sizeof(filename), ".metatup/mnt%s/@metatup@", get_tup_top());
 		filename[sizeof(filename)-1] = 0;
 		for(x=0; x<5000; x++) {
 			struct timespec ts = {0, 1000000};
@@ -510,7 +510,7 @@ static int exec_internal(struct server *s, const char *cmd, struct tup_env *newe
 
 	if(!s->streaming_mode) {
 		char buf[64];
-		snprintf(buf, sizeof(buf), ".tup/tmp/output-%i", s->id);
+		snprintf(buf, sizeof(buf), ".metatup/tmp/output-%i", s->id);
 		buf[sizeof(buf)-1] = 0;
 		s->output_fd = openat(tup_top_fd(), buf, O_RDONLY);
 		if(s->output_fd < 0) {
@@ -529,7 +529,7 @@ static int exec_internal(struct server *s, const char *cmd, struct tup_env *newe
 		}
 
 		if(!single_output) {
-			snprintf(buf, sizeof(buf), ".tup/tmp/errors-%i", s->id);
+			snprintf(buf, sizeof(buf), ".metatup/tmp/errors-%i", s->id);
 			buf[sizeof(buf)-1] = 0;
 			s->error_fd = openat(tup_top_fd(), buf, O_RDWR);
 			if(s->error_fd < 0) {

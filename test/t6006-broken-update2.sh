@@ -21,7 +21,7 @@
 # other available command). What it shouldn't do is assume everything is up-to-
 # date.
 . ./tup.sh
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 
 echo "int main(void) {}" > foo.c
 update

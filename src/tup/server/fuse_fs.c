@@ -93,7 +93,7 @@ static int is_hidden(const char *path)
 {
 	if(strstr(path, "/.git") != NULL)
 		return 1;
-	if(strstr(path, "/.tup") != NULL)
+	if(strstr(path, "/.metatup") != NULL)
 		return 1;
 	if(strstr(path, "/.hg") != NULL)
 		return 1;
@@ -370,7 +370,7 @@ static int tup_fs_getattr(const char *path, struct stat *stbuf)
 	 */
 	finfo = get_finfo(path);
 	if(finfo) {
-		if(strcmp(peeled, ".tup/mnt") == 0 || strstr(peeled, "/.tup/mnt") != NULL) {
+		if(strcmp(peeled, ".metatup/mnt") == 0 || strstr(peeled, "/.metatup/mnt") != NULL) {
 			/* t6056 - don't allow sub-processes to mess with our
 			 * data.
 			 */
@@ -392,8 +392,8 @@ static int tup_fs_getattr(const char *path, struct stat *stbuf)
 		put_finfo(finfo);
 	}
 
-	/* First we get a getattr("@tup@"), then we get a
-	 * getattr("@tup@/CONFIG_FOO"). So first time we return success so fuse
+	/* First we get a getattr("@metatup@"), then we get a
+	 * getattr("@metatup@/CONFIG_FOO"). So first time we return success so fuse
 	 * will assume the directory is there, then the second time we keep
 	 * track of the variable and return failure because we're not actually
 	 * going to open anything.
@@ -478,7 +478,7 @@ static int tup_fs_access(const char *path, int mask)
 
 	/* OSX will call access() on the virtual directory before calling
 	 * getattr() on the variable name, so we check for that here. The
-	 * var[0] == 0 check means it is just the @tup@ directory itself, and
+	 * var[0] == 0 check means it is just the @metatup@ directory itself, and
 	 * not a variable name.
 	 */
 	var = get_virtual_var(peeled);
@@ -548,7 +548,7 @@ static void add_dir_entries(DIR *dp, void *buf, fuse_fill_dir_t filler,
 		st.st_ino = de->d_ino;
 		st.st_mode = de->d_type << 12;
 
-		if(!ignore_dot_tup || strcmp(de->d_name, ".tup") != 0)
+		if(!ignore_dot_tup || strcmp(de->d_name, ".metatup") != 0)
 			if(mfiller(buf, de->d_name, &st, 0))
 				break;
 	}
@@ -690,7 +690,7 @@ static int tup_fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
 				if(fstat(tup_top_fd(), &st) < 0) {
 					int rc = -errno;
-					fprintf(stderr, "tup error: Unable to stat .tup directory\n");
+					fprintf(stderr, "tup error: Unable to stat .metatup directory\n");
 					put_finfo(finfo);
 					return rc;
 				}
@@ -717,7 +717,7 @@ static int tup_fs_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 	tup_fuse_handle_file(path, NULL, ACCESS_READ);
 
 	/* If finfo is NULL, we're outside of tup, so we don't need to ignore
-	 * any files called '.tup' in that case.
+	 * any files called '.metatup' in that case.
 	 */
 	return fill_actual_directory(peeled, buf, filler, finfo != NULL);
 }

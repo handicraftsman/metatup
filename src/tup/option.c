@@ -28,6 +28,7 @@
 #endif
 
 #include "compat.h"
+#include "config.h"
 #include "option.h"
 #include "vardb.h"
 #include "init.h"
@@ -154,7 +155,14 @@ int tup_option_process_ini(void)
 			fclose(f);
 		}
 
-		if(stat(".tup", &st) == 0 && S_ISDIR(st.st_mode)) {
+		{
+			int rc = migrate_legacy_tup_dir();
+			if(rc < 0) {
+				fprintf(stderr, "tup error: Unexpected error while checking for the project metadata directory\n");
+				exit(1);
+			}
+		}
+		if(stat(TUP_DIR, &st) == 0 && S_ISDIR(st.st_mode)) {
 			found_tup_dir = 1;
 			break;
 		}
@@ -199,9 +207,9 @@ int tup_option_process_ini(void)
 				fprintf(stderr, "tup error: Unexpected error getting root path\n");
 				exit(1);
 			}
-			printf("Initializing .tup directory\n");
+			printf("Initializing .metatup directory\n");
 		} else {
-			printf("Initializing .tup in %s\n", root_path);
+			printf("Initializing .metatup in %s\n", root_path);
 		}
 
 		rc = init_command(argc, argv);

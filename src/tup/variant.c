@@ -91,7 +91,7 @@ int variant_add(struct tup_entry *tent, int enabled, struct variant **dest)
 
 	if(tent->dt == DOT_DT) {
 		variant->root_variant = 1;
-		variant->vardict_len = snprintf(variant->vardict_file, sizeof(variant->vardict_file), ".tup/vardict") + 1;
+		variant->vardict_len = snprintf(variant->vardict_file, sizeof(variant->vardict_file), ".metatup/vardict") + 1;
 	} else {
 		variant->root_variant = 0;
 
@@ -100,9 +100,9 @@ int variant_add(struct tup_entry *tent, int enabled, struct variant **dest)
 		 * (tent->parent->dt == DOT_DT) use the name of the variant.
 		 */
 		if(tent->parent->dt == DOT_DT) {
-			variant->vardict_len = snprintf(variant->vardict_file, sizeof(variant->vardict_file), ".tup/vardict-%s", variant->variant_dir+1) + 1;
+			variant->vardict_len = snprintf(variant->vardict_file, sizeof(variant->vardict_file), ".metatup/vardict-%s", variant->variant_dir+1) + 1;
 		} else {
-			variant->vardict_len = snprintf(variant->vardict_file, sizeof(variant->vardict_file), ".tup/vardict-%lli", variant->dtnode.tupid) + 1;
+			variant->vardict_len = snprintf(variant->vardict_file, sizeof(variant->vardict_file), ".metatup/vardict-%lli", variant->dtnode.tupid) + 1;
 		}
 	}
 	if(variant->vardict_len >= (signed)sizeof(variant->vardict_file)) {
@@ -133,7 +133,7 @@ int variant_rm(struct variant *variant)
 	if(unlinkat(tup_top_fd(), variant->vardict_file, 0) < 0) {
 		if(errno != ENOENT) {
 			perror(variant->vardict_file);
-			fprintf(stderr, "tup error: Unable to remove old vardict file '%s' from .tup directory.\n", variant->vardict_file);
+			fprintf(stderr, "tup error: Unable to remove old vardict file '%s' from .metatup directory.\n", variant->vardict_file);
 			return -1;
 		}
 	}

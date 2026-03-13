@@ -25,10 +25,10 @@ mkdir sw/toolkit
 mkdir sw/app
 
 cat > sw/Tuprules.tup << HERE
-&LIB = toolkit/lib.tup
+&LIB = toolkit/lib.metatup
 HERE
 
-cat > sw/toolkit/lib.tup << HERE
+cat > sw/toolkit/lib.metatup << HERE
 STATIC_LIBS += \$(TUP_CWD)/toolkit.a
 HERE
 
@@ -42,6 +42,6 @@ HERE
 update
 
 tup_dep_exist sw/app "echo app.a ../toolkit/toolkit.a > libs.txt" sw/app libs.txt
-tup_dep_exist sw/toolkit lib.tup sw app
+tup_dep_exist sw/toolkit lib.metatup sw app
 
 eotup

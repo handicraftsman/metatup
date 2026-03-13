@@ -21,7 +21,7 @@
 check_no_windows run-script
 
 mkdir sub
-cat > sub/include.tup << HERE
+cat > sub/include.metatup << HERE
 preload foo
 HERE
 
@@ -29,7 +29,7 @@ mkdir sub/foo
 touch sub/foo/bar.c
 
 cat > Tupfile << HERE
-include sub/include.tup
+include sub/include.metatup
 run sh -e ok.sh
 HERE
 

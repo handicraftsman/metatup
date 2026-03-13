@@ -22,7 +22,7 @@
 #define tup_monitor_h
 
 #define AUTOUPDATE_PID "autoupdate pid"
-#define MONITOR_PID_FILE ".tup/monitor.pid"
+#define MONITOR_PID_FILE ".metatup/monitor.pid"
 
 int monitor_supported(void);
 int monitor(int argc, char **argv);

@@ -22,7 +22,7 @@ check_tup_suid
 
 set_full_deps
 
-cp ../testTupfile.tup Tupfile
+cp ../testTupfile.metatup Tupfile
 
 echo "int main(void) {}" > foo.c
 update
