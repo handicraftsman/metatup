@@ -38,6 +38,7 @@
 #include "estring.h"
 #include "tupbuild.h"
 #include "metatup_repo.h"
+#include "tupignore.h"
 #include "flist.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -249,6 +250,8 @@ static struct bin_head *current_bin_head(struct tupfile *tf);
 static int tent_is_tup_internal(struct tup_entry *tent);
 static int resolve_materialized_dir(struct tupfile *tf, const char *path,
 				    int root_from_caller_root, struct tup_entry **tent);
+static char *join_path2(const char *a, const char *b);
+static int std_repo_direct_path(const char *file, const char *base_rel, char **file_abs, char **dir_abs);
 
 enum parser_type {
 	PARSER_TYPE_TUP = 0,
@@ -258,6 +261,70 @@ enum parser_type {
 
 static int debug_run = 0;
 static int parser_auto_compiledb = 0;
+
+static char *join_path2(const char *a, const char *b)
+{
+	size_t len = strlen(a) + strlen(b) + 2;
+	char *out = malloc(len);
+
+	if(!out) {
+		perror("malloc");
+		return NULL;
+	}
+	snprintf(out, len, "%s/%s", a, b);
+	return out;
+}
+
+static int std_repo_direct_path(const char *file, const char *base_rel, char **file_abs, char **dir_abs)
+{
+	char joined[PATH_MAX];
+	char *resolved = NULL;
+	char *slash;
+	const char *top = get_tup_top();
+	size_t top_len = strlen(top);
+	static const char needle[] = "/.metatup/repos/std/";
+
+	*file_abs = NULL;
+	*dir_abs = NULL;
+	if(file[0] == '/') {
+		if(snprintf(joined, sizeof(joined), "%s", file) >= (int)sizeof(joined))
+			return -1;
+	} else {
+		if(base_rel && strcmp(base_rel, ".") != 0) {
+			if(snprintf(joined, sizeof(joined), "%s/%s/%s", top, base_rel, file) >= (int)sizeof(joined))
+				return -1;
+		} else {
+			if(snprintf(joined, sizeof(joined), "%s/%s", top, file) >= (int)sizeof(joined))
+				return -1;
+		}
+	}
+	resolved = realpath(joined, NULL);
+	if(!resolved)
+		return 0;
+	if(strncmp(resolved, top, top_len) != 0 ||
+	   strstr(resolved + top_len, needle) == NULL) {
+		free(resolved);
+		return 0;
+	}
+	*file_abs = resolved;
+	*dir_abs = strdup(resolved);
+	if(!*dir_abs) {
+		perror("strdup");
+		free(resolved);
+		*file_abs = NULL;
+		return -1;
+	}
+	slash = strrchr(*dir_abs, '/');
+	if(!slash) {
+		free(*file_abs);
+		free(*dir_abs);
+		*file_abs = NULL;
+		*dir_abs = NULL;
+		return 0;
+	}
+	*slash = 0;
+	return 1;
+}
 
 void parser_debug_run(void)
 {
@@ -4625,8 +4692,11 @@ static int load_function_file(struct tupfile *tf, const char *file, struct tup_f
 	struct tup_entry *newtent;
 	char current_path[PATH_MAX];
 	char *normalized_file = NULL;
+	char *direct_file_abs = NULL;
+	char *direct_dir_abs = NULL;
 	const char *resolved_file = file;
 	char *current_repo_root = NULL;
+	int allow_hidden = 0;
 	int rc = -1;
 
 	*oldtent = tf->curtent;
@@ -4699,6 +4769,31 @@ static int load_function_file(struct tupfile *tf, const char *file, struct tup_f
 				}
 			}
 			pkg = slashes + 2;
+			allow_hidden = 1;
+			if(strcmp(repo_name, "std") == 0) {
+				if(pkg[0] == 0) {
+					direct_file_abs = join_path2(repo_root, "Tupfile");
+					direct_dir_abs = strdup(repo_root);
+				} else if(pkg[strlen(pkg)-1] == '/') {
+					char *pkg_dir = join_path2(repo_root, pkg);
+					if(pkg_dir) {
+						direct_file_abs = join_path2(pkg_dir, "Tupfile");
+						direct_dir_abs = pkg_dir;
+					}
+				} else {
+					char *pkg_dir = join_path2(repo_root, pkg);
+					if(pkg_dir) {
+						direct_file_abs = join_path2(pkg_dir, "Tupfile");
+						direct_dir_abs = pkg_dir;
+					}
+				}
+				if(!direct_file_abs || !direct_dir_abs) {
+					perror("malloc");
+					free(repo_name);
+					free(repo_root);
+					goto out;
+				}
+			}
 			free(repo_name);
 		} else {
 			pkg = file + 2;
@@ -4748,10 +4843,35 @@ static int load_function_file(struct tupfile *tf, const char *file, struct tup_f
 		free(repo_prefix);
 		free(repo_root);
 		resolved_file = normalized_file;
+	} else {
+		int direct_std_rc = std_repo_direct_path(file, current_path, &direct_file_abs, &direct_dir_abs);
+		if(direct_std_rc < 0)
+			goto out;
+		if(direct_std_rc > 0)
+			allow_hidden = 1;
 	}
 	if(get_path_elements(resolved_file, &pg) < 0)
 		goto out;
-	if(pg.pg_flags & PG_HIDDEN) {
+	if(direct_file_abs) {
+		fd = open(direct_file_abs, O_RDONLY);
+		if(fd < 0) {
+			parser_error(tf, direct_file_abs);
+			goto out_pg;
+		}
+		tf->cur_dfd = open(direct_dir_abs, O_RDONLY);
+		if(tf->cur_dfd < 0) {
+			parser_error(tf, direct_dir_abs);
+			goto out_fd;
+		}
+		tf->function_registry = reg;
+		if(fslurp_null(fd, &incb) < 0)
+			goto out_dfd;
+		if(scan_tupfile_functions(tf, &incb, file) < 0)
+			goto out_buf;
+		rc = 0;
+		goto out_buf;
+	}
+	if((pg.pg_flags & PG_HIDDEN) && !allow_hidden) {
 		fprintf(tf->f, "tup error: Unable to call function from file with hidden path element.\n");
 		goto out_pg;
 	}
@@ -4802,6 +4922,8 @@ out_pel:
 out_pg:
 	del_pel_group(&pg);
 out:
+	free(direct_file_abs);
+	free(direct_dir_abs);
 	free(normalized_file);
 	free(current_repo_root);
 	return rc;
@@ -6642,6 +6764,13 @@ int parse_dependent_tupfiles(struct path_list_head *plist, struct tupfile *tf)
 
 			if(tup_entry_add(pl->dt, &dtent) < 0)
 				return -1;
+			if(pl->pel) {
+				int ignored = tupignore_matches_part(dtent, pl->pel->path, pl->pel->len);
+				if(ignored < 0)
+					return -1;
+				if(ignored)
+					goto skip_dependent_parse;
+			}
 			variant = tup_entry_variant(dtent);
 			if(variant != tf->variant && !variant->root_variant) {
 				fprintf(tf->f, "tup error: Unable to use files from another variant (%s) in this variant (%s)\n", variant->variant_dir, tf->variant->variant_dir);
@@ -6680,6 +6809,7 @@ int parse_dependent_tupfiles(struct path_list_head *plist, struct tupfile *tf)
 				 */
 				timespan_add_delta(&tf->ts, &ts);
 			}
+skip_dependent_parse:
 			if(tent_tree_add_dup(&tf->input_root, dtent) < 0)
 				return -1;
 		}

@@ -41,6 +41,7 @@
 #include "estring.h"
 #include "logging.h"
 #include "luaparser.h"
+#include "tupignore.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -2091,7 +2092,12 @@ static int create_work(struct graph *g, struct node *n)
 	int rc = 0;
 	if(n->tent->type == TUP_NODE_DIR) {
 		if(tup_entry_variant(n->tent)->enabled) {
-			if(n->already_used) {
+			int ignored = tupignore_matches_tent(n->tent);
+			if(ignored < 0)
+				rc = -1;
+			else if(ignored)
+				rc = 0;
+			else if(n->already_used) {
 				rc = 0;
 			} else {
 				rc = parse(n, g, NULL, refactoring, 1, full_deps);

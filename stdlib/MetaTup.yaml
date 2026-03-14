@@ -1,0 +1,4 @@
+components:
+  - name: _stdlib_marker
+    tupfile: ./Tupfile
+    function: _build_marker

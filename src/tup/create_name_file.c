@@ -206,6 +206,10 @@ tupid_t tup_file_mod_mtime(tupid_t dt, const char *file, struct timespec mtime,
 			if(tup_db_add_config_list(tent->tnode.tupid) < 0)
 				return -1;
 		}
+		if(strcmp(file, ".tupignore") == 0) {
+			if(tup_db_add_create_list(dt) < 0)
+				return -1;
+		}
 	}
 
 	return tent->tnode.tupid;
@@ -253,6 +257,10 @@ int tup_file_del(tupid_t dt, const char *file, int len, int *modified)
 	 * (t7040).
 	 */
 	if(strncmp(file, ".gitignore", len) == 0 && len == 10) {
+		if(tup_db_add_create_list(dt) < 0)
+			return -1;
+	}
+	if(strncmp(file, ".tupignore", len) == 0 && len == 10) {
 		if(tup_db_add_create_list(dt) < 0)
 			return -1;
 	}

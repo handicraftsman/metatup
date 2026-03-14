@@ -1,4 +1,5 @@
 #include "metatup_repo.h"
+#include "embedded_stdlib.h"
 #include <yaml.h>
 #include <errno.h>
 #include <limits.h>
@@ -29,6 +30,9 @@ struct mtr_parser {
 	const char *filename;
 	char **err;
 };
+
+#define METATUP_STDLIB_REPO_DIR ".metatup/repos"
+#define METATUP_STDLIB_REPO_NAME "std"
 
 static void mtr_free_dep(struct mtr_dep *dep)
 {
@@ -356,6 +360,20 @@ static char *mtr_join(const char *a, const char *b)
 	return out;
 }
 
+static int mtr_set_err_path(char **err, const char *action, const char *path)
+{
+	size_t len = strlen(action) + strlen(path) + strlen(strerror(errno)) + 8;
+
+	free(*err);
+	*err = malloc(len);
+	if(!*err) {
+		perror("malloc");
+		return -1;
+	}
+	snprintf(*err, len, "%s %s: %s", action, path, strerror(errno));
+	return -1;
+}
+
 static int mtr_mkdir_p(const char *path)
 {
 	char tmp[PATH_MAX];
@@ -382,6 +400,80 @@ static int mtr_mkdir_p(const char *path)
 		return -1;
 	}
 	return 0;
+}
+
+static int mtr_write_file(const char *path, const unsigned char *data, unsigned int len, char **err)
+{
+	FILE *f;
+
+	f = fopen(path, "wb");
+	if(!f)
+		return mtr_set_err_path(err, "unable to open", path);
+	if(len > 0 && fwrite(data, 1, len, f) != len) {
+		fclose(f);
+		return mtr_set_err_path(err, "unable to write", path);
+	}
+	if(fclose(f) != 0)
+		return mtr_set_err_path(err, "unable to close", path);
+	return 0;
+}
+
+static int mtr_materialize_stdlib(const char *repo_root, char **path_out, char **err)
+{
+	char *repos_dir = NULL;
+	char *target = NULL;
+	unsigned int x;
+	int rc = -1;
+
+	repos_dir = mtr_join(repo_root, METATUP_STDLIB_REPO_DIR);
+	target = repos_dir ? mtr_join(repos_dir, METATUP_STDLIB_REPO_NAME) : NULL;
+	if(!repos_dir || !target)
+		goto out;
+	if(mtr_mkdir_p(target) < 0) {
+		mtr_set_err_path(err, "unable to create", target);
+		goto out;
+	}
+	for(x=0; x<metatup_stdlib_files_count; x++) {
+		const struct metatup_embedded_file *file = &metatup_stdlib_files[x];
+		char *dest = mtr_join(target, file->path);
+		char *dir = NULL;
+		char *slash;
+
+		if(!dest)
+			goto out;
+		dir = strdup(dest);
+		if(!dir) {
+			perror("strdup");
+			free(dest);
+			goto out;
+		}
+		slash = strrchr(dir, '/');
+		if(slash) {
+			*slash = 0;
+			if(mtr_mkdir_p(dir) < 0) {
+				mtr_set_err_path(err, "unable to create", dir);
+				free(dir);
+				free(dest);
+				goto out;
+			}
+		}
+		free(dir);
+		if(mtr_write_file(dest, file->data, file->len, err) < 0) {
+			free(dest);
+			goto out;
+		}
+		free(dest);
+	}
+	*path_out = strdup(target);
+	if(!*path_out) {
+		perror("strdup");
+		goto out;
+	}
+	rc = 0;
+out:
+	free(repos_dir);
+	free(target);
+	return rc;
 }
 
 static int mtr_run_git_clone(const char *url, const char *branch, const char *target, char **err)
@@ -592,6 +684,8 @@ int metatup_repo_materialize(const char *repo_root, const char *name, char **pat
 
 	*path_out = NULL;
 	*err = NULL;
+	if(strcmp(name, "std") == 0)
+		return mtr_materialize_stdlib(repo_root, path_out, err);
 	config = mtr_join(repo_root, "MetaTupRepo.yaml");
 	repos_dir = mtr_join(repo_root, ".metatup/repos");
 	target = repos_dir ? mtr_join(repos_dir, name) : NULL;

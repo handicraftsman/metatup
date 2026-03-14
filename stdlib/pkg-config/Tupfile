@@ -1,0 +1,10 @@
+function config {
+  bind pkgs := "pkgs"
+
+  rules {
+    LIBS = `pkg-config --libs $(pkgs)`
+    CFLAGS = `pkg-config --cflags $(pkgs)`
+  }
+
+  return { "flags": "$(CFLAGS)", "linkflags": "$(LIBS)" }
+}

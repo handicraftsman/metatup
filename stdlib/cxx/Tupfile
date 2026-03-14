@@ -1,0 +1,40 @@
+function compile {
+  bind cxx := "cxx/compiler" || c++
+  bind sources := "cxx/compile/sources"
+  bind objdir := "cxx/compile/objdir"
+  bind cxxflags := "cxx/flags"
+
+  bind brdir := "brdir"
+
+  rules {
+    !cxx = |> ^jc CXX %o^ $(cxx) $(cxxflags) -c %f -o %o |>
+  }
+
+  : foreach $(sources) |> !cxx |> $(brdir)/$(objdir)/%B.o {objects}
+
+  return { "objects": "$(groups {objects})" }
+}
+
+function binary {
+  bind cxx := "cxx/compiler" || c++
+  bind sources := "cxx/binary/sources"
+  bind cxxflags := "cxx/flags"
+  bind linkflags := "cxx/linkflags"
+  bind name := "cxx/binary/name"
+
+  bind brdir := "brdir"
+
+  rules {
+    !link_exe = |> ^c LINK_EXE %o ^ $(cxx) $(cxxflags) $(linkflags) %f -o %o |>
+  }
+
+  fbind { "objects": objects } := call compile ({
+    ...,
+    "cxx/compile/sources": "$(sources)",
+    "cxx/compile/objdir": "$(name).objs"
+  })
+
+  : $(objects) |> !link_exe |> $(brdir)/$(name) {bin}
+
+  return { "bin": "$(groups {bin})" }
+}

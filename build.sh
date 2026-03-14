@@ -85,6 +85,9 @@ cp ../src/luabuiltin/builtin.lua builtin.lua
 mkdir luabuiltin
 ./lua ../src/luabuiltin/xxd.lua builtin.lua luabuiltin/luabuiltin.h
 
+stdlib_files=`find ../stdlib -type f | sort`
+./lua ../src/tup/embed_stdlib.lua ../stdlib embedded_stdlib_data.h $stdlib_files
+
 CFLAGS="$CFLAGS -DTUP_SERVER=\"$server\""
 CFLAGS="$CFLAGS -DPCRE2_CODE_UNIT_WIDTH=8"
 CFLAGS="$CFLAGS -DHAVE_CONFIG_H"
