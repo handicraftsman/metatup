@@ -106,7 +106,7 @@ static int get_symlink(const char *filename, char **ret)
 			return -1;
 		}
 	} else {
-		char *last_slash;
+		const char *last_slash;
 		int dirlen;
 		last_slash = strrchr(filename, '/');
 		if(!last_slash) {

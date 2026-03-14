@@ -221,10 +221,10 @@ static int load_function_file(struct tupfile *tf, const char *file, struct tup_f
 static void restore_loaded_function_file(struct tupfile *tf, struct tup_entry *oldtent, int old_dfd);
 static int vardb_clone(struct vardb *dst, struct vardb *src);
 static int function_arg_set_reldir(struct tupfile *tf, struct vardb *args);
-static int function_arg_set_brdir(struct tupfile *tf, struct vardb *args);
+static int function_arg_set_brdir(struct vardb *args);
 static int parse_tupbuild(struct tupfile *tf, struct buf *b, const char *filename);
 static int tupbuild_resolve_builddir(struct tupfile *tf, const char *builddir, struct tup_entry **tent);
-static int tupbuild_combine_builddir_reldir(struct tupfile *tf, const char *builddir, const char *reldir, char **out);
+static int tupbuild_combine_builddir_reldir(const char *builddir, const char *reldir, char **out);
 static int canonicalize_path_simple(const char *path, char **out);
 static int eval_abs_function(struct tupfile *tf, const char *args, int argslen, struct estring *e);
 static int eval_globs_function(struct tupfile *tf, const char *args, int argslen, struct estring *e);
@@ -243,7 +243,6 @@ static int tupbuild_materialize_dist(struct tupfile *tf, struct tup_build_ctx *c
 static int path_uses_caller_path_var(struct tupfile *tf, const char *path);
 static int statement_needs_more_lines(const char *line);
 static struct bin_head *current_bin_head(struct tupfile *tf);
-static int tent_is_hidden(struct tup_entry *tent);
 static int tent_is_tup_internal(struct tup_entry *tent);
 static int resolve_materialized_dir(struct tupfile *tf, const char *path,
 				    int root_from_caller_root, struct tup_entry **tent);
@@ -754,16 +753,6 @@ static struct bin_head *current_bin_head(struct tupfile *tf)
 	if(tf->func_frame)
 		return &tf->func_frame->bin_list;
 	return &tf->bin_list;
-}
-
-static int tent_is_hidden(struct tup_entry *tent)
-{
-	while(tent) {
-		if(tent->name.s && pel_ignored(tent->name.s, tent->name.len))
-			return 1;
-		tent = tent->parent;
-	}
-	return 0;
 }
 
 static int tent_is_tup_internal(struct tup_entry *tent)
@@ -1970,7 +1959,7 @@ int parser_include_file(struct tupfile *tf, const char *file)
 	struct tup_function_registry *old_registry = tf->function_registry;
 	struct tup_entry *srctent = NULL;
 	struct tup_entry *newtent;
-	char *lua;
+	const char *lua;
 
 	if(get_path_elements(file, &pg) < 0)
 		goto out_err;
@@ -2135,7 +2124,7 @@ static int parse_rule(struct tupfile *tf, char *p, int lno)
 
 	if(r.command[0] == '!') {
 		char *space;
-		space = memchr(r.command, ' ', r.command_len);
+		space = memchr(cmd, ' ', r.command_len);
 		if(space) {
 			*space = 0;
 			r.extra_command = space + 1;
@@ -3078,7 +3067,7 @@ static int function_arg_set_reldir(struct tupfile *tf, struct vardb *args)
 	return 0;
 }
 
-static int function_arg_set_brdir(struct tupfile *tf, struct vardb *args)
+static int function_arg_set_brdir(struct vardb *args)
 {
 	struct var_entry *builddir;
 	struct var_entry *reldir;
@@ -3090,7 +3079,7 @@ static int function_arg_set_brdir(struct tupfile *tf, struct vardb *args)
 	reldir = vardb_get(args, "reldir", strlen("reldir"));
 	if(!reldir || !reldir->value)
 		return 0;
-	if(tupbuild_combine_builddir_reldir(tf, builddir->value, reldir->value, &brdir) < 0)
+	if(tupbuild_combine_builddir_reldir(builddir->value, reldir->value, &brdir) < 0)
 		return -1;
 	if(vardb_set(args, "brdir", brdir, NULL) < 0) {
 		free(brdir);
@@ -3623,7 +3612,6 @@ static int glob_root_from_pattern(const char *pattern, char **out)
 		root_end = pattern + 1;
 	}
 	while(1) {
-		const char *segment_start = next;
 		next = next_glob_segment(next, &seg, &len);
 		if(len == 0)
 			break;
@@ -4376,7 +4364,7 @@ static int execute_function(struct tupfile *tf, struct tup_function *fn, struct 
 		}
 	}
 	if(!inherit_reldir || vardb_get(&frame.args, "brdir", strlen("brdir")) == NULL) {
-		if(function_arg_set_brdir(tf, &frame.args) < 0) {
+		if(function_arg_set_brdir(&frame.args) < 0) {
 			vardb_close(&frame.args);
 			return -1;
 		}
@@ -4606,10 +4594,11 @@ static int parse_function_invoke(struct tupfile *tf, char *line, int lno, int in
 		line++;
 	if(*line == '"') {
 		const char *tmp = line;
+		char *orig = line;
 		rc = parse_quoted_string(&tmp, &path);
 		if(rc < 0)
 			return rc;
-		line = (char*)tmp;
+		line = orig + (tmp - orig);
 		while(isspace(*line))
 			line++;
 	}
@@ -4811,13 +4800,14 @@ out_materialize:
 			invoke++;
 		if(*invoke == '"') {
 			const char *tmp = invoke;
+			char *orig = invoke;
 			invoke_rc = parse_quoted_string(&tmp, &path);
 			if(invoke_rc < 0) {
 				vardb_close(&returns);
 				vardb_close(&bindings);
 				return invoke_rc;
 			}
-			invoke = (char*)tmp;
+			invoke = orig + (tmp - orig);
 			while(isspace(*invoke))
 				invoke++;
 		}
@@ -5034,7 +5024,7 @@ static int tupbuild_build_stamp_path(const char *builddir, const char *name, cha
 	return 0;
 }
 
-static int tupbuild_combine_builddir_reldir(struct tupfile *tf, const char *builddir, const char *reldir, char **out)
+static int tupbuild_combine_builddir_reldir(const char *builddir, const char *reldir, char **out)
 {
 	struct pel_group pg;
 	struct path_element *pel;
@@ -5213,7 +5203,7 @@ static int tupbuild_create_copy_rule(struct tupfile *tf, struct tup_build_ctx *c
 	return rc;
 }
 
-static int tupbuild_dist_output_path(struct tupfile *tf, const char *root, const char *dest, char **out)
+static int tupbuild_dist_output_path(const char *root, const char *dest, char **out)
 {
 	char *joined;
 	char *canon;
@@ -5250,7 +5240,7 @@ static int tupbuild_materialize_dist(struct tupfile *tf, struct tup_build_ctx *c
 	for(x=0; x<dm.num_entries; x++) {
 		char *dest;
 
-		if(tupbuild_dist_output_path(tf, root, dm.entries[x].dest, &dest) < 0) {
+		if(tupbuild_dist_output_path(root, dm.entries[x].dest, &dest) < 0) {
 			dist_manifest_free(&dm);
 			return -1;
 		}
@@ -7801,7 +7791,7 @@ static char *tup_printf(struct tupfile *tf, const char *cmd, int cmd_len,
 				 * directory from where .tup is stored, since
 				 * the top-level tup entry is just "."
 				 */
-				char *last_slash;
+				const char *last_slash;
 				const char *dirstring;
 				int len;
 

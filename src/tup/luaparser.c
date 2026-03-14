@@ -373,7 +373,7 @@ static int tuplua_function_getdirectory(lua_State *ls)
 		 * directory from where .tup is stored, since
 		 * the top-level tup entry is just "."
 		 */
-		char *last_slash;
+		const char *last_slash;
 		const char *dirstring;
 
 		last_slash = strrchr(get_tup_top(), path_sep());

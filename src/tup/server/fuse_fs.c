@@ -147,7 +147,7 @@ static const char *peel(const char *path)
 		return NULL;
 
 	if(strncmp(path + 1, TUP_JOB, sizeof(TUP_JOB)-1) == 0) {
-		char *slash;
+		const char *slash;
 
 		path += sizeof(TUP_JOB); /* +1 and -1 cancel */
 		slash = strchr(path, '/');
