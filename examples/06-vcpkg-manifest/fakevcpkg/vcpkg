@@ -1,0 +1,35 @@
+#! /bin/sh -e
+
+cmd=$1
+shift
+
+manifest_root=
+triplet=
+install_root=
+
+for arg in "$@"; do
+  case "$arg" in
+    --x-manifest-root=*)
+      manifest_root=${arg#--x-manifest-root=}
+      ;;
+    --triplet=*)
+      triplet=${arg#--triplet=}
+      ;;
+    --x-install-root=*)
+      install_root=${arg#--x-install-root=}
+      ;;
+  esac
+done
+
+test "$cmd" = install
+test -n "$manifest_root"
+test -n "$triplet"
+test -n "$install_root"
+
+name=$(sed -n 's/.*"name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$manifest_root/vcpkg.json")
+baseline=$(sed -n 's/.*"baseline"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$manifest_root/vcpkg-configuration.json")
+
+mkdir -p "$install_root/$triplet/include" "$install_root/$triplet/lib" "$install_root/$triplet/bin"
+printf '%s-%s-header\n' "$name" "$baseline" > "$install_root/$triplet/include/fake.h"
+printf '%s-%s-lib\n' "$name" "$baseline" > "$install_root/$triplet/lib/libfake.a"
+printf '%s-%s-tool\n' "$name" "$baseline" > "$install_root/$triplet/bin/fake-tool"

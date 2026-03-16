@@ -1,0 +1,13 @@
+function build_runtime {
+  bind brdir := "brdir"
+
+  : |> printf '#!/bin/sh\necho demo-tool\n' > %o && chmod +x %o |> $(brdir)/bin/demo-tool
+  : |> printf 'packaged by MetaTup\n' > %o |> $(brdir)/share/README.txt
+
+  fbind package := dist {
+    at "$(brdir)/bin/demo-tool" => at "/bin/demo-tool"
+    at "$(brdir)/share/README.txt" => at "/share/README.txt"
+  }
+
+  return { "package": "$(package)" }
+}

@@ -1,0 +1,19 @@
+function merge {
+  bind name := "name"
+  bind inputs := "inputs"
+  bind brdir := "brdir" || "./build"
+
+  : $(inputs) |> cat %f > %o |> $(brdir)/$(name).txt {out}
+  : |> printf '%s\n' $(groups {out}) > %o |> $(brdir)/$(name).group.txt
+
+  return {
+    "out": "$(groups {out})",
+    "out_abs": "$(abs $(brdir)/$(name).txt)",
+    "bundle": "$(prefix_paths $(brdir)/ ; $(name).txt $(name).group.txt)"
+  }
+}
+
+function emit_notice {
+  bind message := "message"
+  : |> printf '%s\n' "$(message)" > %o |> notice.txt
+}

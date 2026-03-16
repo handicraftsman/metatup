@@ -1,0 +1,4 @@
+components:
+  - name: banner
+    tupfile: ./Tupfile
+    function: build_banner

@@ -1,0 +1,4 @@
+components:
+  - name: runtime
+    tupfile: ./Tupfile
+    function: build_runtime

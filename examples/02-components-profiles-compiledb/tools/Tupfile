@@ -1,0 +1,4 @@
+function build_banner {
+  bind brdir := "brdir"
+  : |> printf 'banner enabled\n' > %o |> $(brdir)/banner.txt
+}

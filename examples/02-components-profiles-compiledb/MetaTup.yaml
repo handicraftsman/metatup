@@ -1,0 +1,26 @@
+auto_compiledb: true
+defaults:
+  c/opt: -O2
+  mode: release
+profiles:
+  - name: with-banner
+    set:
+      c/opt: -O0 -g
+      mode: debug
+components:
+  - name: app
+    tupfile: ./Tupfile
+    function: build_app
+    dependencies:
+      - name: //tools:banner
+        require_if:
+          - profile_enabled: with-banner
+    binds:
+      - from: [c/opt]
+        to: cflags
+      - from: [mode]
+        to: extra_message
+        case:
+          - when: debug
+            then: debug-profile
+          - default: release-profile

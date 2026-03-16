@@ -37,7 +37,12 @@ for output in "$@"; do
     exit 1
   fi
   mkdir -p "$(dirname "$output")"
-  cp "$src" "$output"
+  if [ -d "$src" ]; then
+    rm -rf "$output"
+    cp -R "$src" "$output"
+  else
+    cp "$src" "$output"
+  fi
 done
 
 mkdir -p "$(dirname "$stamp")"

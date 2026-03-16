@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+
+if [ -n "${VCPKG_ROOT:-}" ]; then
+  if [ -x "$VCPKG_ROOT/vcpkg" ]; then
+    exec "$VCPKG_ROOT/vcpkg" "$@"
+  fi
+  if [ -x "$VCPKG_ROOT/vcpkg.exe" ]; then
+    exec "$VCPKG_ROOT/vcpkg.exe" "$@"
+  fi
+fi
+
+if command -v vcpkg >/dev/null 2>&1; then
+  exec "$(command -v vcpkg)" "$@"
+fi
+
+echo "unable to find vcpkg; set VCPKG_ROOT or add vcpkg to PATH" >&2
+exit 1

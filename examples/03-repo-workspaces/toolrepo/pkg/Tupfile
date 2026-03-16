@@ -1,0 +1,12 @@
+function build_tool {
+  bind brdir := "brdir"
+
+  : |> printf 'toolrepo payload\n' > %o |> $(brdir)/tool.txt
+
+  return { "tool_path": "$(abs $(brdir)/tool.txt)" }
+}
+
+function write_notice {
+  bind message := "message"
+  : |> printf '%s\n' "$(message)" > %o |> notice.txt
+}

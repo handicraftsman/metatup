@@ -31,6 +31,11 @@ A typical MetaTup flow looks like this:
 2. Create a build directory and run `tup gen <component>`.
 3. Run `tup` to execute the generated `TupBuild.yaml`.
 
+See `examples/` for a staged set of standalone sample projects covering the
+function API, generated component builds, repo workspaces, dist exports,
+external projects, hermetic vcpkg helper coverage, and a real vcpkg-backed
+native build example.
+
 For the command-level details, see `metatup.1`.
 
 ---

@@ -1,0 +1,104 @@
+function host {
+  ifeq (@(TUP_PLATFORM),win32)
+    fbind {
+      "family": family,
+      "os": os,
+      "cc": cc,
+      "cxx": cxx,
+      "linker": linker,
+      "ar": ar
+    } := call msvc({})
+  endif
+
+  ifeq (@(TUP_PLATFORM),macosx)
+    fbind {
+      "family": family,
+      "os": os,
+      "cc": cc,
+      "cxx": cxx,
+      "linker": linker,
+      "ar": ar
+    } := call clang({
+      "toolchain/os": "macos"
+    })
+  endif
+
+  ifeq (@(TUP_PLATFORM),linux)
+    fbind {
+      "family": family,
+      "os": os,
+      "cc": cc,
+      "cxx": cxx,
+      "linker": linker,
+      "ar": ar
+    } := call gcc({
+      "toolchain/os": "linux"
+    })
+  endif
+
+  return {
+    "family": "$(family)",
+    "os": "$(os)",
+    "cc": "$(cc)",
+    "cxx": "$(cxx)",
+    "linker": "$(linker)",
+    "ar": "$(ar)"
+  }
+}
+
+function gcc {
+  bind os := "toolchain/os" || linux
+
+  return {
+    "family": "gcc",
+    "os": "$(os)",
+    "cc": "gcc",
+    "cxx": "g++",
+    "linker": "g++",
+    "ar": "ar"
+  }
+}
+
+function clang {
+  bind os := "toolchain/os" || linux
+
+  return {
+    "family": "clang",
+    "os": "$(os)",
+    "cc": "clang",
+    "cxx": "clang++",
+    "linker": "clang++",
+    "ar": "ar"
+  }
+}
+
+function msvc {
+  return {
+    "family": "msvc",
+    "os": "windows",
+    "cc": "cl",
+    "cxx": "cl",
+    "linker": "link",
+    "ar": "lib"
+  }
+}
+
+function package_flags {
+  bind family := "toolchain/family" || gcc
+  bind include_dir := "package/include_dir"
+  bind lib_dir := "package/lib_dir"
+  bind posix_link_flags := "package/posix_link_flags" || ""
+  bind msvc_link_flags := "package/msvc_link_flags" || ""
+
+  ifeq ($(family),msvc)
+    return {
+      "c_flags": "/I$(include_dir)",
+      "link_flags": "/LIBPATH:$(lib_dir) $(msvc_link_flags)"
+    }
+  endif
+
+  return {
+    "c_flags": "-I$(include_dir)",
+    "link_flags": "-L$(lib_dir) $(posix_link_flags)"
+  }
+}

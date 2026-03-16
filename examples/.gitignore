@@ -1,0 +1,6 @@
+**/.metatup/
+**/TupBuild.yaml
+**/compile_commands.json
+**/build/
+**/*.build/
+**/release/

@@ -1,0 +1,6 @@
+meta:
+  name: root
+
+dependencies:
+  - name: tools
+    path: ./toolrepo

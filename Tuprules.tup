@@ -42,6 +42,8 @@ CFLAGS += -D_FILE_OFFSET_BITS=64
 CFLAGS += -fno-common
 CFLAGS += -I$(TUP_VARIANTDIR)/src
 CFLAGS += -I$(TUP_CWD)/src
+CFLAGS += -I$(TUP_VARIANTDIR)/src/tup
+CFLAGS += -I$(TUP_CWD)/src/tup
 
 ifeq (@(TUP_32_BIT),y)
 CFLAGS += -m32

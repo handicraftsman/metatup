@@ -1,0 +1,17 @@
+fbind {
+  "prefix": prefix,
+  "include_dir": include_dir,
+  "bin_dir": bin_dir,
+  "stamp": stamp
+} := call "@std//external" project({
+  "brdir": "./build/ext",
+  "external/srcdir": "./proj",
+  "external/inputs": "./proj/meta/name.txt ./proj/meta/version.txt ./proj/configure.sh ./proj/build.sh ./proj/install.sh",
+  "external/configure_script": "./proj/configure.sh",
+  "external/build_script": "./proj/build.sh",
+  "external/install_script": "./proj/install.sh",
+  "external/install_cmd": "",
+  "external/export_files": "include/demo.h bin/demo-tool"
+})
+
+: $(prefix)/include/demo.h $(prefix)/bin/demo-tool |> cat %f > %o |> app.txt
