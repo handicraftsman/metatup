@@ -1,0 +1,30 @@
+function install_manifest {
+  bind exe := "vcpkg/exe"
+  bind manifest_dir := "vcpkg/manifest_dir"
+  bind manifest_inputs := "vcpkg/manifest_inputs"
+  bind triplet := "vcpkg/triplet"
+  bind export_files := "vcpkg/export_files" || ""
+  bind outputs := "vcpkg/outputs"
+  bind helper_script := "vcpkg/helper_script" || "$(TUP_ROOT)/.metatup/repos/std/vcpkg/install_manifest.sh"
+  bind brdir := "brdir" || .
+
+  PREFIX = $(brdir)/vcpkg_installed/$(triplet)
+  STAMP = $(brdir)/vcpkg_$(triplet).stamp
+  OUTPUTS = $(outputs)
+
+  ifeq ($(OUTPUTS),)
+    OUTPUTS = $(prefix_paths $(PREFIX)/ ; $(export_files))
+  endif
+
+  : $(manifest_inputs) | $(exe) |> ^ VCPKG %o^ sh $(helper_script) "$(exe)" "$(manifest_dir)" "$(triplet)" "$(PREFIX)" "$(STAMP)" $(OUTPUTS) |> $(STAMP) $(OUTPUTS) {installed}
+
+  return {
+    "prefix": "$(abs $(PREFIX))",
+    "include_dir": "$(abs $(PREFIX)/include)",
+    "lib_dir": "$(abs $(PREFIX)/lib)",
+    "bin_dir": "$(abs $(PREFIX)/bin)",
+    "debug_lib_dir": "$(abs $(PREFIX)/debug/lib)",
+    "debug_bin_dir": "$(abs $(PREFIX)/debug/bin)",
+    "stamp": "$(abs $(STAMP))"
+  }
+}

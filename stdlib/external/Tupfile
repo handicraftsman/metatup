@@ -1,0 +1,32 @@
+function project {
+  bind srcdir := "external/srcdir"
+  bind inputs := "external/inputs"
+  bind configure_script := "external/configure_script" || ""
+  bind build_script := "external/build_script" || ""
+  bind install_script := "external/install_script" || ""
+  bind configure_cmd := "external/configure_cmd" || ""
+  bind build_cmd := "external/build_cmd" || ""
+  bind install_cmd := "external/install_cmd"
+  bind export_files := "external/export_files" || ""
+  bind outputs := "external/outputs"
+  bind helper_script := "external/helper_script" || "$(TUP_ROOT)/.metatup/repos/std/external/run_project.sh"
+  bind brdir := "brdir" || .
+
+  PREFIX = $(brdir)/external_prefix
+  STAMP = $(brdir)/external_project.stamp
+  OUTPUTS = $(outputs)
+
+  ifeq ($(OUTPUTS),)
+    OUTPUTS = $(prefix_paths $(PREFIX)/ ; $(export_files))
+  endif
+
+  : $(inputs) | $(srcdir) |> ^ EXTERNAL %o^ sh $(helper_script) "$(srcdir)" "$(brdir)" "$(PREFIX)" "$(STAMP)" "$(configure_script)" "$(build_script)" "$(install_script)" "$(configure_cmd)" "$(build_cmd)" "$(install_cmd)" $(OUTPUTS) |> $(STAMP) $(OUTPUTS) {installed}
+
+  return {
+    "prefix": "$(abs $(PREFIX))",
+    "include_dir": "$(abs $(PREFIX)/include)",
+    "lib_dir": "$(abs $(PREFIX)/lib)",
+    "bin_dir": "$(abs $(PREFIX)/bin)",
+    "stamp": "$(abs $(STAMP))"
+  }
+}

@@ -750,6 +750,15 @@ Append "value" to the end of the current value of "var". If "var" has not been s
 .B [lua] metatup.getcwd()
 The special $-variable TUP_CWD is always set to the path relative to the Tupfile currently parsed. It can change value when including a file in a different directory. For example, if you "include ../foo.tup", then TUP_CWD will be set to ".." when parsing foo.tup. This lets foo.tup specify flags like "CFLAGS += -I$(TUP_CWD)", and CFLAGS will always have the -I directory where foo.tup is located, no matter if it was included as "../foo.tup" or "../../foo.tup" or "subdir/foo.tup". For an alternative to $(TUP_CWD) when referring to files, see the section on &-variables below.
 .TP
+.B $(TUP_ROOT)
+.PD 0
+.TP
+.B [lua] metatup.getroot()
+The special $-variable TUP_ROOT is always set to the path from the Tupfile currently parsed back to the root of the tup hierarchy. Like TUP_CWD, it changes when includes switch parsing into another directory. At the top of the hierarchy it evaluates to ".". For example, if a file in "foo/bar" references $(TUP_ROOT), the value will be "../..".
+.TP
+.B $(prefix_paths <prefix> ; <paths...>)
+Prefixes each whitespace-separated path in the evaluated '<paths...>' list with the evaluated '<prefix>' string. This is useful when a function accepts prefix-relative file lists and needs to materialize them under a build directory. For example, `$(prefix_paths build/out/ ; include/a.h bin/tool)` expands to `build/out/include/a.h build/out/bin/tool`.
+.TP
 .B $(TUP_VARIANTDIR)
 .PD 0
 .TP

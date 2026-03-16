@@ -4386,6 +4386,57 @@ static int eval_groups_function(struct tupfile *tf, const char *args, int argsle
 	return 0;
 }
 
+static int eval_prefix_paths_function(struct tupfile *tf, const char *args, int argslen, struct estring *e)
+{
+	const char *sep;
+	char *prefix_raw = NULL;
+	char *paths_raw = NULL;
+	char *prefix = NULL;
+	char *paths = NULL;
+	char *copy = NULL;
+	char *tok;
+	char *saveptr = NULL;
+	int first = 1;
+	int rc = -1;
+
+	sep = memchr(args, ';', argslen);
+	if(!sep) {
+		fprintf(tf->f, "tup error: $(prefix_paths ...) requires '<prefix> ; <paths...>' syntax.\n");
+		return -1;
+	}
+	prefix_raw = dup_trimmed_range(args, sep);
+	paths_raw = dup_trimmed_range(sep + 1, args + argslen);
+	if(!prefix_raw || !paths_raw) {
+		perror("strndup");
+		goto out;
+	}
+	prefix = eval(tf, prefix_raw, KEEP_NODES);
+	paths = eval(tf, paths_raw, KEEP_NODES);
+	if(!prefix || !paths)
+		goto out;
+	copy = strdup(paths);
+	if(!copy) {
+		perror("strdup");
+		goto out;
+	}
+	for(tok = strtok_r(copy, " \t\r\n", &saveptr); tok; tok = strtok_r(NULL, " \t\r\n", &saveptr)) {
+		if(!first && estring_append(e, " ", 1) < 0)
+			goto out;
+		if(estring_append(e, prefix, strlen(prefix)) < 0 ||
+		   estring_append(e, tok, strlen(tok)) < 0)
+			goto out;
+		first = 0;
+	}
+	rc = 0;
+out:
+	free(prefix_raw);
+	free(paths_raw);
+	free(prefix);
+	free(paths);
+	free(copy);
+	return rc;
+}
+
 static int move_name_list(struct name_list *dst, struct name_list *src)
 {
 	while(!TAILQ_EMPTY(&src->entries)) {
@@ -8611,6 +8662,14 @@ char *eval(struct tupfile *tf, const char *string, int expand_nodes)
 						tup_db_print(tf->f, tf->curtent->tnode.tupid);
 						return NULL;
 					}
+				} else if(rparen-var == 8 &&
+					  strncmp(var, "TUP_ROOT", 8) == 0) {
+					if(get_relative_dir(NULL, &e, tf->curtent->tnode.tupid, DOT_DT) < 0) {
+						fprintf(tf->f, "tup internal error: Unable to find relative directory from ID %lli -> %i\n", tf->curtent->tnode.tupid, DOT_DT);
+						tup_db_print(tf->f, tf->curtent->tnode.tupid);
+						tup_db_print(tf->f, DOT_DT);
+						return NULL;
+					}
 				} else if(rparen-var == 14 &&
 					  strncmp(var, "TUP_VARIANTDIR", 14) == 0) {
 					char value[32];
@@ -8652,6 +8711,10 @@ char *eval(struct tupfile *tf, const char *string, int expand_nodes)
 				} else if(rparen - var > 9 &&
 					  strncmp(var, "realname ", 9) == 0) {
 					if(eval_realname_function(tf, var + 9, rparen - (var + 9), &e) < 0)
+						return NULL;
+				} else if(rparen - var > 13 &&
+					  strncmp(var, "prefix_paths ", 13) == 0) {
+					if(eval_prefix_paths_function(tf, var + 13, rparen - (var + 13), &e) < 0)
 						return NULL;
 				} else {
 					struct var_entry *ve = NULL;

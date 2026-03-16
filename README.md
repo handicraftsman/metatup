@@ -13,7 +13,7 @@ MetaTup extends Tup in a few major areas:
 * Function-oriented Tupfiles.
   Functions can contain rules, accept bound arguments, return values, and be invoked either in the current Tupfile context or via `spawn` in another Tupfile.
 * Expression helpers for function composition.
-  `$(globs ...)` resolves globs in-place, `$(groups ...)` expands built groups for returns and downstream use, and `$(abs ...)` returns the absolute path to a single file.
+  `$(globs ...)` resolves globs in-place, `$(groups ...)` expands built groups for returns and downstream use, `$(abs ...)` returns the absolute path to a single file, and `$(prefix_paths ...)` prefixes a whitespace-separated path list.
 * YAML-driven build selection with `MetaTup.yaml` and `TupBuild.yaml`.
   Components can describe concrete builds or aggregate dependencies, and `tup gen` materializes those definitions into `TupBuild.yaml`.
 * Higher-level dependency wiring.

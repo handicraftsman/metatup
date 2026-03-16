@@ -331,6 +331,28 @@ static int tuplua_function_getcwd(lua_State *ls)
 	return 1;
 }
 
+static int tuplua_function_getroot(lua_State *ls)
+{
+	struct tupfile *tf = top_tupfile();
+	struct estring e;
+
+	lua_settop(ls, 0);
+
+	if(estring_init(&e) < 0)
+		return luaL_error(ls, "Error allocating memory in tuplua_function_getroot()");
+
+	if(get_relative_dir(NULL, &e, tf->curtent->tnode.tupid, DOT_DT) < 0) {
+		fprintf(tf->f, "tup internal error: Unable to find relative directory from ID %lli -> %i\n", tf->curtent->tnode.tupid, DOT_DT);
+		tup_db_print(tf->f, tf->curtent->tnode.tupid);
+		tup_db_print(tf->f, DOT_DT);
+		return luaL_error(ls, "Failed to get relative directory in getroot.");
+	}
+
+	lua_pushlstring(ls, e.s, e.len);
+	free(e.s);
+	return 1;
+}
+
 static int tuplua_function_getvariantdir(lua_State *ls)
 {
 	struct tupfile *tf = top_tupfile();
@@ -754,6 +776,7 @@ int tup_lua_parser_new_state(void)
 	tuplua_register_function(gls, "definerule", tuplua_function_definerule);
 	tuplua_register_function(gls, "append_table", tuplua_function_append_table);
 	tuplua_register_function(gls, "getcwd", tuplua_function_getcwd);
+	tuplua_register_function(gls, "getroot", tuplua_function_getroot);
 	tuplua_register_function(gls, "getvariantdir", tuplua_function_getvariantdir);
 	tuplua_register_function(gls, "getvariantoutputdir", tuplua_function_getvariantoutputdir);
 	tuplua_register_function(gls, "getdirectory", tuplua_function_getdirectory);
