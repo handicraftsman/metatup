@@ -15,8 +15,8 @@ server=${TUP_SERVER:-$default_server}
 plat_cflags="-Os"
 plat_ldflags=""
 plat_files=""
-yaml_cflags="`pkg-config yaml-0.1 --cflags`"
-yaml_ldflags="`pkg-config yaml-0.1 --libs`"
+yaml_cflags='-I../third-party/libyaml/include -DYAML_DECLARE_STATIC -DYAML_VERSION_MAJOR=0 -DYAML_VERSION_MINOR=2 -DYAML_VERSION_PATCH=5 -DYAML_VERSION_STRING="0.2.5"'
+yaml_ldflags=""
 if [ "$server" = "fuse" ]; then
 	plat_cflags="`pkg-config fuse --cflags`"
 	plat_ldflags="`pkg-config fuse --libs`"
@@ -73,13 +73,14 @@ cd build
 
 for i in ../src/lua/*.c; do
 	echo "  bootstrap CC $CFLAGS $i"
-	$CC $CFLAGS -DLUA_USE_POSIX -c $i
+	obj=`echo $i | sed 's/^\.\.//; s/\//_/g'`.o
+	$CC $CFLAGS -DLUA_USE_POSIX -c $i -o $obj
 done
 
-rm luac.o
+rm _src_lua_luac.c.o
 echo "  link lua"
-$CC *.o -o lua $LDFLAGS
-rm lua.o
+$CC _src_lua_*.o -o lua $LDFLAGS
+rm _src_lua_lua.c.o
 
 cp ../src/luabuiltin/builtin.lua builtin.lua
 mkdir luabuiltin
@@ -92,15 +93,16 @@ CFLAGS="$CFLAGS -DTUP_SERVER=\"$server\""
 CFLAGS="$CFLAGS -DPCRE2_CODE_UNIT_WIDTH=8"
 CFLAGS="$CFLAGS -DHAVE_CONFIG_H"
 
-for i in ../src/tup/*.c ../src/tup/tup/main.c ../src/tup/monitor/$monitor ../src/tup/flock/fcntl.c ../src/inih/ini.c ../src/pcre/*.c $plat_files; do
+for i in ../src/tup/*.c ../src/tup/tup/main.c ../src/tup/monitor/$monitor ../src/tup/flock/fcntl.c ../src/inih/ini.c ../src/pcre/*.c ../third-party/libyaml/src/*.c $plat_files; do
 	echo "  bootstrap CC $CFLAGS $i"
 	# Put -I. first so we find our new luabuiltin.h file, not one built
 	# by a previous invocation of 'tup'.
-	$CC $CFLAGS -c $i -I. -I../src -I../src/pcre -I../src/inih $plat_cflags
+	obj=`echo $i | sed 's/^\.\.//; s/\//_/g'`.o
+	$CC $CFLAGS $yaml_cflags -c $i -o $obj -I. -I../src -I../src/pcre -I../src/inih $plat_cflags
 done
 
 echo "  bootstrap CC $CFLAGS ../src/sqlite3/sqlite3.c"
-$CC $CFLAGS -c ../src/sqlite3/sqlite3.c -DSQLITE_TEMP_STORE=2 -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION $plat_cflags
+$CC $CFLAGS -c ../src/sqlite3/sqlite3.c -o _src_sqlite3_sqlite3.c.o -DSQLITE_TEMP_STORE=2 -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION $plat_cflags
 
 echo "  bootstrap LD metatup $LDFLAGS"
 objs="$(echo *.o)"
@@ -112,7 +114,8 @@ if [ "$server" = "ldpreload" ]; then
 	CFLAGS="$CFLAGS -fpic"
 	for i in ../../src/ldpreload/*.c ../../src/tup/flock/fcntl.c ../../src/tup/ccache.c; do
 		echo "  bootstrap CC $CFLAGS $i"
-		$CC $CFLAGS -c $i -I../../src $plat_cflags -o `basename $i`.64.o -pthread
+		obj=`echo $i | sed 's/^\.\.\/\.\.//; s/\//_/g'`.o
+		$CC $CFLAGS -c $i -I../../src $plat_cflags -o $obj -pthread
 	done
 	echo "  bootstrap LD metatup-ldpreload.so"
 	$CC *.o -o ../metatup-ldpreload.so -fpic -shared -ldl $plat_ldflags $LDFLAGS -pthread
