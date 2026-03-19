@@ -95,6 +95,10 @@ int find_tup_dir(void)
 			tup_wd[tup_top_len] = 0;
 			break;
 		}
+		if(access("Tupfile.ini", F_OK) == 0) {
+			return -1;
+		}
+
 		if(chdir("..") < 0) {
 			perror("chdir");
 			exit(1);

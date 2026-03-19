@@ -166,6 +166,9 @@ int tup_option_process_ini(void)
 			found_tup_dir = 1;
 			break;
 		}
+		if(best_root != -1) {
+			break;
+		}
 
 		if(chdir("..")) {
 			perror("chdir");
