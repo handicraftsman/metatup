@@ -3,7 +3,7 @@
  * tup - A file-based build system
  *
  * Copyright (C) 2013  Rendaw <rendaw@zarbosoft.com>
- * Copyright (C) 2013-2024  Mike Shal <marfey@gmail.com>
+ * Copyright (C) 2013-2026  Mike Shal <marfey@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -136,11 +136,11 @@ static int tuplua_function_include(lua_State *ls)
 	struct tupfile *tf = top_tupfile();
 	char *file = NULL;
 
-	file = tuplua_strdup(ls, -1);
+	file = tuplua_strdup(ls, 1);
+	if(file == NULL)
+		return luaL_error(ls, "tup.include() must be passed a filename as an argument.");
 	lua_pop(ls, 1);
 	assert(lua_gettop(ls) == 0);
-	if(file == NULL)
-		return luaL_error(ls, "Must be passed a filename as an argument.");
 
 	if(parser_include_file(tf, file) < 0) {
 		if (tf->luaerror == TUPLUA_NOERROR) {
@@ -229,8 +229,8 @@ static int tuplua_function_definerule(lua_State *ls)
 	init_rule(&r);
 	init_name_list(&return_nl);
 
-	if(!lua_istable(ls, -1))
-		return luaL_error(ls, "This function must be passed a table containing parameters");
+	if(!lua_istable(ls, 1))
+		return luaL_error(ls, "tup.definerule() must be passed a table containing parameters");
 
 	TAILQ_INIT(&input_path_list);
 	if(tuplua_table_to_path_list(ls, "inputs", tf, &input_path_list, EXPAND_NODES_SRC) < 0)
@@ -314,8 +314,6 @@ static int tuplua_function_getcwd(lua_State *ls)
 	struct tupfile *tf = top_tupfile();
 	struct estring e;
 
-	lua_settop(ls, 0);
-
 	if(estring_init(&e) < 0)
 		return luaL_error(ls, "Error allocating memory in tuplua_function_getcwd()");
 
@@ -356,10 +354,8 @@ static int tuplua_function_getroot(lua_State *ls)
 static int tuplua_function_getvariantdir(lua_State *ls)
 {
 	struct tupfile *tf = top_tupfile();
-
-	lua_settop(ls, 0);
-
 	char value[32];
+
 	snprintf(value, 31, "%%%llit", tf->curtent->tnode.tupid);
 	value[31] = 0;
 	lua_pushlstring(ls, value, strlen(value));
@@ -370,8 +366,6 @@ static int tuplua_function_getvariantoutputdir(lua_State *ls)
 {
 	struct tupfile *tf = top_tupfile();
 	struct estring e;
-
-	lua_settop(ls, 0);
 
 	estring_init(&e);
 	if(get_relative_dir(NULL, &e, tf->srctent->tnode.tupid, tf->tent->tnode.tupid) < 0) {
@@ -426,7 +420,7 @@ static int tuplua_function_getrelativedir(lua_State *ls)
 	if(estring_init(&e) < 0)
 		return luaL_error(ls, "tup.getrelativedir() failed to initialize an estring");
 
-	dirname = tuplua_tostring(ls, -1);
+	dirname = tuplua_tostring(ls, 1);
 	if(!dirname)
 		return luaL_error(ls, "tup.getrelativedir() called with a nil path");
 	dest = find_dir_tupid_dt(tf->tent->tnode.tupid, dirname, NULL, 0, 0);
@@ -450,9 +444,9 @@ static int tuplua_function_getconfig(lua_State *ls)
 	if(estring_init(&e) < 0)
 		return luaL_error(ls, "Error allocating memory in tuplua_function_getconfig()");
 
-	name = tuplua_tolstring(ls, -1, &name_size);
+	name = tuplua_tolstring(ls, 1, &name_size);
 	if(!name)
-		return luaL_error(ls, "Must be passed an config variable name as an argument.");
+		return luaL_error(ls, "tup.getconfig() must be passed a config variable name as an argument.");
 
 	tent = tup_db_get_var(tf->variant, name, name_size, &e);
 	if(!tent)
@@ -510,11 +504,9 @@ static int tuplua_function_glob(lua_State *ls)
 	tgd.directory = NULL;
 	tgd.directory_size = 0;
 
-	lua_settop(ls, 1);
-
-	pattern = tuplua_tostring(ls, -1);
+	pattern = tuplua_tostring(ls, 1);
 	if(pattern == NULL)
-		return luaL_error(ls, "Must be passed a glob pattern as an argument.");
+		return luaL_error(ls, "tup.glob() must be passed a glob pattern as an argument.");
 	lua_pop(ls, 1);
 
 	if(get_path_list(tf, pattern, &plist, 1) < 0) {
@@ -574,9 +566,9 @@ static int tuplua_function_export(lua_State *ls)
 	struct tupfile *tf = top_tupfile();
 	const char *name = NULL;
 
-	name = tuplua_tostring(ls, -1);
+	name = tuplua_tostring(ls, 1);
 	if(name == NULL)
-		return luaL_error(ls, "Must be passed an environment variable name as an argument.");
+		return luaL_error(ls, "tup.export() must be passed an environment variable name as an argument.");
 
 	if(export(tf, name) < 0)
 		return luaL_error(ls, "Failed to export environment variable '%s'.", name);
@@ -591,9 +583,9 @@ static int tuplua_function_import(lua_State *ls)
 	const char *var = NULL;
 	const char *val = NULL;
 
-	name = tuplua_tostring(ls, -1);
+	name = tuplua_tostring(ls, 1);
 	if(name == NULL)
-		return luaL_error(ls, "Must be passed an environment variable name as an argument.");
+		return luaL_error(ls, "tup.import() must be passed an environment variable name as an argument.");
 
 	if(import(tf, name, &var, &val) < 0)
 		return luaL_error(ls, "Failed to import environment variable '%s'.", name);
@@ -672,7 +664,7 @@ static int tuplua_function_run(lua_State *ls)
 
 	cmdline = tuplua_tostring(ls, 1);
 	if(!cmdline)
-		return luaL_error(ls, "run() must be passed a string for the command-line to run");
+		return luaL_error(ls, "tup.run() must be passed a string for the command-line to run");
 
 	if(exec_run_script(tf, cmdline, 0) < 0)
 		return luaL_error(ls, "tup error: Failed to run external script.\n");
@@ -684,10 +676,8 @@ static int tuplua_function_nodevariable(lua_State *ls)
 {
 	struct tupfile *tf = top_tupfile();
 
-	lua_settop(ls, 1);
-
-	if(!tuplua_tostring(ls, -1))
-		return luaL_error(ls, "Must be passed a string referring to a node as argument 1.");
+	if(!tuplua_tostring(ls, 1))
+		return luaL_error(ls, "tup.nodevariable() must be passed a string referring to a node as argument 1.");
 
 	struct tup_entry *tent;
 	tent = get_tent_dt(tf->curtent->tnode.tupid, tuplua_tostring(ls, 1));
@@ -727,8 +717,6 @@ static int tuplua_function_nodevariable_tostring(lua_State *ls)
 	tupid_t tid;
 	struct estring e;
 
-	lua_settop(ls, 1);
-
 	if(!lua_isuserdata(ls, 1))
 		return luaL_error(ls, "Argument 1 is not a node variable.");
 	stackid = lua_touserdata(ls, 1);
@@ -740,8 +728,6 @@ static int tuplua_function_nodevariable_tostring(lua_State *ls)
 	rc = get_relative_dir(NULL, &e, tf->curtent->tnode.tupid, tid);
 	if(rc < 0)
 		return luaL_error(ls, "Error getting relative path tuplua_function_nodevariable_tostring.");
-
-	lua_settop(ls, 0);
 
 	lua_pushlstring(ls, e.s, e.len);
 	free(e.s);

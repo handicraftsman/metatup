@@ -2,7 +2,7 @@
  *
  * tup - A file-based build system
  *
- * Copyright (C) 2008-2024  Mike Shal <marfey@gmail.com>
+ * Copyright (C) 2008-2026  Mike Shal <marfey@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -8047,16 +8047,10 @@ static char *compiledb_rewrite_command(const char *cmd, const char *base_dir)
 
 static int print_compile_db(FILE *f, struct tup_entry *cmdtent, struct tup_entry *filetent)
 {
-	static int first_time = 1;
 	struct tup_entry *srctent = variant_tent_to_srctent(cmdtent->parent);
 	struct estring e;
 	char *command;
 
-	if(first_time) {
-		first_time = 0;
-	} else {
-		fprintf(f, ",\n");
-	}
 	fprintf(f, "{\n");
 	fprintf(f, "    \"directory\": \"");
 	estring_init(&e);
@@ -8122,12 +8116,15 @@ int tup_db_create_compile_db(FILE *f, struct variant *variant)
 		RB_FOREACH(stt, tent_entries, &stickies) {
 			if(stt->tent->type == TUP_NODE_FILE ||
 			   stt->tent->type == TUP_NODE_GENERATED) {
+				if (!empty) {
+					fprintf(f, ",\n");
+				}
 				print_compile_db(f, cmdtent, stt->tent);
+				empty = 0;
 			}
 		}
 		free_tent_tree(&stickies);
 
-		empty = 0;
 	}
 	fprintf(f, "\n]\n");
 	if(tup_db_commit() < 0)

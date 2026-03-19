@@ -2,7 +2,7 @@
  *
  * ldpreload - Shared library shim for file accesses.
  *
- * Copyright (C) 2008-2024  Mike Shal <marfey@gmail.com>
+ * Copyright (C) 2008-2026  Mike Shal <marfey@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@ int stat64(const char *filename, struct stat64 *buf);
 int __xstat64(int __ver, __const char *__filename,
 	      struct stat64 *__stat_buf);
 int __lxstat64(int vers, const char *path, struct stat64 *buf);
+ssize_t __readlink_chk(const char *path, char *buf, size_t len, size_t buflen);
 char *__realpath_chk(const char *path, char *resolved_path, size_t resolvedlen);
 void _mcleanup(void);
 
@@ -71,6 +72,7 @@ static int (*s_creat)(const char *, mode_t);
 static int (*s_symlink)(const char *, const char *);
 static int (*s_symlinkat)(const char *, int, const char *);
 static ssize_t (*s_readlink)(const char *, char *, size_t);
+static ssize_t (*s_readlink_chk)(const char *, char *, size_t, size_t);
 static char *(*s_realpath)(const char *, char *);
 static char *(*s_realpath_chk)(const char *, char *, size_t);
 static int (*s_rename)(const char*, const char*);
@@ -344,6 +346,20 @@ ssize_t readlink(const char *pathname, char *buf, size_t bufsiz)
 	WRAP(s_readlink, "readlink");
 	rc = s_readlink(pathname, buf, bufsiz);
 	handle_file(pathname, "", ACCESS_READ);
+	return rc;
+}
+
+ssize_t __readlink_chk(const char *path, char *buf, size_t len, size_t buflen)
+{
+	ssize_t rc;
+	/* See comment in readlink() */
+	if(strcmp(path, "/etc/malloc.conf") == 0) {
+		errno = ENOENT;
+		return -1;
+	}
+	WRAP(s_readlink_chk, "__readlink_chk");
+	rc = s_readlink_chk(path, buf, len, buflen);
+	handle_file(path, "", ACCESS_READ);
 	return rc;
 }
 

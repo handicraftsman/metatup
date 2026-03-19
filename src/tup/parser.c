@@ -2,7 +2,7 @@
  *
  * tup - A file-based build system
  *
- * Copyright (C) 2008-2024  Mike Shal <marfey@gmail.com>
+ * Copyright (C) 2008-2026  Mike Shal <marfey@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -2394,12 +2394,11 @@ static int parse_rule(struct tupfile *tf, char *p, int lno)
 		return -1;
 
 	if(r.command[0] == '!') {
-		char *space;
-		space = memchr(cmd, ' ', r.command_len);
+		const char *space;
+		space = memchr(r.command, ' ', r.command_len);
 		if(space) {
-			*space = 0;
 			r.extra_command = space + 1;
-			r.command_len = strlen(r.command);
+			r.command_len = space - r.command;
 		}
 	}
 

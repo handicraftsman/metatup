@@ -2,7 +2,7 @@
  *
  * tup - A file-based build system
  *
- * Copyright (C) 2008-2024  Mike Shal <marfey@gmail.com>
+ * Copyright (C) 2008-2026  Mike Shal <marfey@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -155,7 +155,7 @@ struct rule {
 	int foreach;
 	struct bin *bin;
 	const char *command;
-	char *extra_command;
+	const char *extra_command;
 	int command_len;
 	struct name_list inputs;
 	struct name_list order_only_inputs;
